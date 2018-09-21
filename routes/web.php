@@ -66,3 +66,10 @@ $router->get('autocomplete', ['uses' => 'CuentaContableController@autocomplete']
 $router->get('dragcuentacontable', ['uses' => 'CuentaContableController@drag']);
 $router->get('cuentapadre', ['uses' => 'CuentaContableController@MaxPadre']);
 $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContableController@getNumCuenta']);
+
+//Estacion
+$router->get('estacion', ['uses' => 'EstacionController@index']);
+$router->get('estacion/{id}', ['uses' => 'EstacionController@show']);
+$router->post('estacion', ['uses' => 'EstacionController@store']);
+$router->put('estacion/{id}', ['uses' => 'EstacionController@update']);
+$router->delete('estacion/{id}', ['uses' => 'EstacionController@destroy']);
