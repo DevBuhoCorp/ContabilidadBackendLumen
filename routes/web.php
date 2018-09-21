@@ -66,3 +66,6 @@ $router->get('autocomplete', ['uses' => 'CuentaContableController@autocomplete']
 $router->get('dragcuentacontable', ['uses' => 'CuentaContableController@drag']);
 $router->get('cuentapadre', ['uses' => 'CuentaContableController@MaxPadre']);
 $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContableController@getNumCuenta']);
+
+//Transacciones
+$router->post('nuevomovimiento', ['uses' => 'TransaccionController@nuevomovimiento']);

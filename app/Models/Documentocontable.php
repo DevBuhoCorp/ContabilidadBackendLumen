@@ -32,9 +32,8 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  */
 class Documentocontable extends Eloquent
 {
-	protected $table = 'documentocontable';
+	protected $table = 'documentocontable';  
 	protected $primaryKey = 'ID';
-	public $incrementing = false;
 	public $timestamps = false;
 
 	protected $casts = [
