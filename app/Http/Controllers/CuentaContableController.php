@@ -30,12 +30,14 @@ class CuentaContableController extends Controller
             if ($request->isJson()) {
                 $cuentas = PlanContable::join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
                     ->where('plancontable.IDModelo', $request->input('Modelo'))
-                    ->select(DB::raw('cuentacontable.NumeroCuenta,cuentacontable.Etiqueta'))->get();
+                    //->select(DB::raw('cuentacontable.ID,cuentacontable.NumeroCuenta,cuentacontable.Etiqueta'))->get();
+                    ->select(DB::raw("cuentacontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->get();
 
-                $cuentas = $cuentas->map(function ($row) {
+
+                /*$cuentas = $cuentas->map(function ($row) {
                     return $row['NumeroCuenta'] . ' ' . $row['Etiqueta'];
 
-                });
+                });*/
                 return response()->json($cuentas, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);

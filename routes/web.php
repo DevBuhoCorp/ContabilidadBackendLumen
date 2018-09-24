@@ -69,3 +69,5 @@ $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContable
 
 //Transacciones
 $router->post('nuevomovimiento', ['uses' => 'TransaccionController@nuevomovimiento']);
+$router->post('nuevodetalle', ['uses' => 'TransaccionController@detallemovimiento']);
+$router->get('listardetalles', ['uses' => 'TransaccionController@listamovimientos']);
