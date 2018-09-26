@@ -2,34 +2,31 @@
 
 /**
  * Created by Reliese Model.
- * Date: Thu, 13 Sep 2018 22:19:14 +0000.
+ * Date: Wed, 26 Sep 2018 22:16:25 +0000.
  */
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Reliese\Database\Eloquent\Model as Eloquent;
 
 /**
  * Class Cuentabancarium
  * 
  * @property int $ID
- * @property string $Referencia
- * @property string $Cuenta
- * @property string $Etiqueta
- * @property int $TipoCuenta
- * @property string $Estado
- * @property string $Web
- * @property float $SaldoInicial
+ * @property int $IDEmpresa
+ * @property int $IDBanco
+ * @property int $IDTipoCuenta
  * @property \Carbon\Carbon $Fecha
+ * @property float $SaldoInicial
  * @property float $SaldoMinimo
- * @property string $NombreBanco
  * @property string $NumeroCuenta
+ * @property string $IdentificacionTitular
  * @property string $NombreTitular
  * @property string $DireccionTitular
- * @property string $CuentaBancariacol
- * @property int $IDCuenta
+ * @property string $Estado
  * 
- * @property \App\Models\Cuentacontable $cuentacontable
+ * @property \App\Models\Banco $banco
+ * @property \App\Models\Empresa $empresa
  * @property \App\Models\Tipocuentabancarium $tipocuentabancarium
  *
  * @package App\Models
@@ -40,10 +37,11 @@ class Cuentabancarium extends Eloquent
 	public $timestamps = false;
 
 	protected $casts = [
-		'TipoCuenta' => 'int',
+		'IDEmpresa' => 'int',
+		'IDBanco' => 'int',
+		'IDTipoCuenta' => 'int',
 		'SaldoInicial' => 'float',
-		'SaldoMinimo' => 'float',
-		'IDCuenta' => 'int'
+		'SaldoMinimo' => 'float'
 	];
 
 	protected $dates = [
@@ -51,30 +49,31 @@ class Cuentabancarium extends Eloquent
 	];
 
 	protected $fillable = [
-		'Referencia',
-		'Cuenta',
-		'Etiqueta',
-		'TipoCuenta',
-		'Estado',
-		'Web',
-		'SaldoInicial',
+		'IDEmpresa',
+		'IDBanco',
+		'IDTipoCuenta',
 		'Fecha',
+		'SaldoInicial',
 		'SaldoMinimo',
-		'NombreBanco',
 		'NumeroCuenta',
+		'IdentificacionTitular',
 		'NombreTitular',
 		'DireccionTitular',
-		'CuentaBancariacol',
-		'IDCuenta'
+		'Estado'
 	];
 
-	public function cuentacontable()
+	public function banco()
 	{
-		return $this->belongsTo(\App\Models\Cuentacontable::class, 'IDCuenta');
+		return $this->belongsTo(\App\Models\Banco::class, 'IDBanco');
+	}
+
+	public function empresa()
+	{
+		return $this->belongsTo(\App\Models\Empresa::class, 'IDEmpresa');
 	}
 
 	public function tipocuentabancarium()
 	{
-		return $this->belongsTo(\App\Models\Tipocuentabancarium::class, 'TipoCuenta');
+		return $this->belongsTo(\App\Models\Tipocuentabancarium::class, 'IDTipoCuenta');
 	}
 }
