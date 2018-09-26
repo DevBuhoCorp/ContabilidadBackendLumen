@@ -68,6 +68,4 @@ $router->get('cuentapadre', ['uses' => 'CuentaContableController@MaxPadre']);
 $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContableController@getNumCuenta']);
 
 //Transacciones
-$router->post('nuevomovimiento', ['uses' => 'TransaccionController@nuevomovimiento']);
-$router->post('nuevodetalle', ['uses' => 'TransaccionController@detallemovimiento']);
-$router->get('listardetalles', ['uses' => 'TransaccionController@listamovimientos']);
+$router->post('transaccion', ['uses' => 'TransaccionController@store']);

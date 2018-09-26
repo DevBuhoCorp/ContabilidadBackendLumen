@@ -10,47 +10,28 @@ use Illuminate\Http\Request;
 
 class TransaccionController extends Controller
 {
-
-    public function nuevomovimiento(Request $request)
+    public function store(Request $request)
     {
         try {
             if ($request->isJson()) {
+                $detalles = $request->all()['Detalle'];
                 $carbon = Carbon::now('America/Guayaquil');
                 $actual = $carbon->toDateTimeString();
-                $carbon2 = new Carbon($request->input('Fecha'));
+                $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
                 $fechadoc = $carbon2->toDateString();
                 $transaccion = new Transaccion();
                 $transaccion->Fecha = $actual;
                 $transaccion->save();
                 $documento = new Documentocontable();
                 $documento->Fecha = $fechadoc;
-                $documento->SerieDocumento = $request->input('SerieDocumento');
+                $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
                 $documento->IDTransaccion = $transaccion->ID;
                 $documento->save();
-                return response()->json([
-                    'NumMovimiento' => $transaccion->ID, 'Fecha' => $documento->Fecha->toDateString(), 'DocContable' => $documento->SerieDocumento,
-                    'FechaC' => $transaccion->Fecha->toDateString()
-                ], 201);
-            }
-            return response()->json(['error' => 'Unauthorized'], 401);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e], 500);
-        }
-    }
-
-    public function detallemovimiento(Request $request)
-    {
-        try {
-            if ($request->isJson()) {
-               // $detalle = Detalletransaccion::create($request->all());
-                $detalle = new Detalletransaccion();
-                $detalle->IDCuenta = $request->input('IDCuenta');
-                $detalle->Etiqueta = $request->input('Etiqueta');
-                $detalle->Debe = $request->input('Debe');
-                $detalle->Haber = $request->input('Haber');
-                $detalle->IDTransaccion = $request->input('IDTransaccion');
-                $detalle->save();
-                return response()->json($detalle, 201);
+                for ($i = 0; $i < count($detalles); $i++) {
+                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+                }
+                $detalles = Detalletransaccion::insert($detalles);
+                return response()->json($detalles, 201);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
@@ -59,18 +40,8 @@ class TransaccionController extends Controller
 
     }
 
-    public function listamovimientos(Request $request)
-    {
-        try {
-            if ($request->isJson()) {
-                $detalle = new Detalletransaccion();
-                $detalle = $detalle->paginate($request->input('psize'));                
-                return response()->json($detalle, 200);
-            }
-            return response()->json(['error' => 'Unauthorized'], 401);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e], 500);
-        }
-    }
+
+
+
 
 }
