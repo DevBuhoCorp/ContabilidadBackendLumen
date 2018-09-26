@@ -73,3 +73,6 @@ $router->get('estacion/{id}', ['uses' => 'EstacionController@show']);
 $router->post('estacion', ['uses' => 'EstacionController@store']);
 $router->put('estacion/{id}', ['uses' => 'EstacionController@update']);
 $router->delete('estacion/{id}', ['uses' => 'EstacionController@destroy']);
+
+//Transacciones
+$router->post('transaccion', ['uses' => 'TransaccionController@store']);

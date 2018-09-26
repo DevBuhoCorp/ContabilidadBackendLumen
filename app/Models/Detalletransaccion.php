@@ -2,7 +2,7 @@
 
 /**
  * Created by Reliese Model.
- * Date: Thu, 13 Sep 2018 22:19:14 +0000.
+ * Date: Tue, 25 Sep 2018 16:44:25 +0000.
  */
 
 namespace App\Models;
@@ -19,8 +19,8 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * @property float $Haber
  * @property int $IDTransaccion
  * 
- * @property \App\Models\Cuentacontable $cuentacontable
  * @property \App\Models\Transaccion $transaccion
+ * @property \App\Models\Plancontable $plancontable
  *
  * @package App\Models
  */
@@ -45,13 +45,13 @@ class Detalletransaccion extends Eloquent
 		'IDTransaccion'
 	];
 
-	public function cuentacontable()
-	{
-		return $this->belongsTo(\App\Models\Cuentacontable::class, 'IDCuenta');
-	}
-
 	public function transaccion()
 	{
 		return $this->belongsTo(\App\Models\Transaccion::class, 'IDTransaccion');
+	}
+
+	public function plancontable()
+	{
+		return $this->hasOne(\App\Models\Plancontable::class, 'ID', 'IDCuenta');
 	}
 }
