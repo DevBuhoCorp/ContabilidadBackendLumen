@@ -16,7 +16,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * @property int $IDEmpresa
  * @property int $IDBanco
  * @property int $IDTipoCuenta
- * @property \Carbon\Carbon $Fecha
+ * @property \Carbon\Carbon $FechaApertura
  * @property float $SaldoInicial
  * @property float $SaldoMinimo
  * @property string $NumeroCuenta
@@ -52,7 +52,7 @@ class Cuentabancarium extends Eloquent
 		'IDEmpresa',
 		'IDBanco',
 		'IDTipoCuenta',
-		'Fecha',
+		'FechaApertura',
 		'SaldoInicial',
 		'SaldoMinimo',
 		'NumeroCuenta',

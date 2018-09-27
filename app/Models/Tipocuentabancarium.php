@@ -13,8 +13,9 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * Class Tipocuentabancarium
  * 
  * @property int $ID
- * @property string $Etiqueta
- * 
+ * @property string $Descripcion
+ * @property string $Observacion
+ *
  * @property \Illuminate\Database\Eloquent\Collection $cuentabancaria
  *
  * @package App\Models
@@ -25,7 +26,7 @@ class Tipocuentabancarium extends Eloquent
 	public $timestamps = false;
 
 	protected $fillable = [
-		'Etiqueta'
+		'Descripcion', 'Observacion'
 	];
 
 	public function cuentabancaria()

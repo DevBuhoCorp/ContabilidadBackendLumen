@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Banco;
+use App\Models\Tipocuentabancarium;
 use Illuminate\Http\Request;
 
-class BancoController extends Controller
+class TipoCuentaBancariaController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,8 +14,8 @@ class BancoController extends Controller
      */
     public function index(Request $request)
     {
-        $bancos = Banco::paginate($request->input('psize'));
-        return Response($bancos, 200);
+        $tcbancaria = Tipocuentabancarium::paginate($request->input('psize'));
+        return Response($tcbancaria, 200);
     }
 
     /**
@@ -25,8 +25,8 @@ class BancoController extends Controller
      */
     public function _Combo(Request $request)
     {
-        $bancos = Banco::where('Estado','ACT')->get();
-        return Response($bancos, 200);
+        $tcbancaria = Tipocuentabancarium::where('Estado','ACT')->get();
+        return Response($tcbancaria, 200);
     }
 
     /**
@@ -47,10 +47,10 @@ class BancoController extends Controller
      */
     public function store(Request $request)
     {
-        $Banco = new Banco($request->all());
-        $Banco->Estado = $request->input("Estado") ? 'ACT' : 'INA';
-        $Banco->save();
-        return Response($Banco, 200);
+        $tcbancaria = new Tipocuentabancarium($request->all());
+        $tcbancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $tcbancaria->save();
+        return Response($tcbancaria, 200);
 
     }
 
@@ -62,8 +62,8 @@ class BancoController extends Controller
      */
     public function show($id)
     {
-        $Banco = Banco::find($id);
-        return Response($Banco, 200);
+        $tcbancaria = Tipocuentabancarium::find($id);
+        return Response($tcbancaria, 200);
     }
 
     /**
@@ -86,12 +86,12 @@ class BancoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $Banco = Banco::find($id);
-        $Banco->Descripcion = $request->input('Descripcion');
-        $Banco->Observacion = $request->input('Observacion');
-        $Banco->Estado = $request->input("Estado") ? 'ACT' : 'INA';
-        $Banco->save();
-        return Response($Banco, 200);
+        $tcbancaria = Tipocuentabancarium::find($id);
+        $tcbancaria->Descripcion = $request->input('Descripcion');
+        $tcbancaria->Observacion = $request->input('Observacion');
+        $tcbancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $tcbancaria->save();
+        return Response($tcbancaria, 200);
     }
 
     /**
@@ -102,9 +102,9 @@ class BancoController extends Controller
      */
     public function destroy($id)
     {
-        $Banco = Banco::find($id);
-        $Banco->Estado = 'INA';
-        $Banco->save();
-        return Response($Banco, 201);
+        $tcbancaria = Tipocuentabancarium::find($id);
+        $tcbancaria->Estado = 'INA';
+        $tcbancaria->save();
+        return Response($tcbancaria, 201);
     }
 }
