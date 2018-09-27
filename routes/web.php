@@ -74,5 +74,12 @@ $router->post('estacion', ['uses' => 'EstacionController@store']);
 $router->put('estacion/{id}', ['uses' => 'EstacionController@update']);
 $router->delete('estacion/{id}', ['uses' => 'EstacionController@destroy']);
 
+//Banco
+$router->get('banco', ['uses' => 'BancoController@index']);
+$router->get('banco/{id}', ['uses' => 'BancoController@show']);
+$router->post('banco', ['uses' => 'BancoController@store']);
+$router->put('banco/{id}', ['uses' => 'BancoController@update']);
+$router->delete('banco/{id}', ['uses' => 'BancoController@destroy']);
+
 //Transacciones
 $router->post('transaccion', ['uses' => 'TransaccionController@store']);
