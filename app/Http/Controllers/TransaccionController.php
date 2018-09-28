@@ -22,6 +22,7 @@ class TransaccionController extends Controller
                 $transaccion = new Transaccion();
                 $transaccion->Fecha = $actual;
                 $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
+                $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
                 $transaccion->save();
                 $documento = new Documentocontable();
                 $documento->Fecha = $fechadoc;
