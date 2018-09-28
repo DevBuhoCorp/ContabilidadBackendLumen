@@ -69,3 +69,4 @@ $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContable
 
 //Transacciones
 $router->post('transaccion', ['uses' => 'TransaccionController@store']);
+$router->get('transaccion', ['uses' => 'TransaccionController@index']);

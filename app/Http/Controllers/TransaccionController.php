@@ -21,6 +21,7 @@ class TransaccionController extends Controller
                 $fechadoc = $carbon2->toDateString();
                 $transaccion = new Transaccion();
                 $transaccion->Fecha = $actual;
+                $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
                 $transaccion->save();
                 $documento = new Documentocontable();
                 $documento->Fecha = $fechadoc;
@@ -32,6 +33,20 @@ class TransaccionController extends Controller
                 }
                 $detalles = Detalletransaccion::insert($detalles);
                 return response()->json($detalles, 201);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+    public function index(Request $request)
+    {
+        try {
+            if ($request->isJson()) {
+                $transacciones = Transaccion::where('Estado','ACT')->paginate($request->input('psize'));
+                return response()->json($transacciones, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
