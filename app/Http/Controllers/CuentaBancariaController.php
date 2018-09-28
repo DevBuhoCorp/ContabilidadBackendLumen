@@ -15,7 +15,8 @@ class CuentaBancariaController extends Controller
      */
     public function index(Request $request)
     {
-        $CuentaBancaria = Cuentabancarium::paginate($request->input('psize'));
+        $CuentaBancaria = Cuentabancarium::where('IDEmpresa', $request->input('empresa') )
+                                            ->paginate($request->input('psize'));
         return Response($CuentaBancaria, 200);
     }
 
@@ -76,8 +77,7 @@ class CuentaBancariaController extends Controller
     public function update(Request $request, $id)
     {
         $CuentaBancaria = Cuentabancarium::find($id);
-//        $CuentaBancaria->Descripcion = $request->input('Descripcion');
-//        $CuentaBancaria->Observacion = $request->input('Observacion');
+        $CuentaBancaria->fill($request->all());
         $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
         $CuentaBancaria->save();
         return Response($CuentaBancaria, 200);
