@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cuentabancarium;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 
 class CuentaBancariaController extends Controller
 {
@@ -11,9 +13,10 @@ class CuentaBancariaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        $CuentaBancaria = Cuentabancarium::paginate($request->input('psize'));
+        return Response($CuentaBancaria, 200);
     }
 
     /**
@@ -34,7 +37,10 @@ class CuentaBancariaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $CuentaBancaria = new Cuentabancarium($request->all());
+        $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $CuentaBancaria->save();
+        return Response($CuentaBancaria, 200);
     }
 
     /**
@@ -45,7 +51,8 @@ class CuentaBancariaController extends Controller
      */
     public function show($id)
     {
-        //
+        $CuentaBancaria = Cuentabancarium::find($id);
+        return Response($CuentaBancaria, 200);
     }
 
     /**
@@ -68,7 +75,12 @@ class CuentaBancariaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $CuentaBancaria = Cuentabancarium::find($id);
+//        $CuentaBancaria->Descripcion = $request->input('Descripcion');
+//        $CuentaBancaria->Observacion = $request->input('Observacion');
+        $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $CuentaBancaria->save();
+        return Response($CuentaBancaria, 200);
     }
 
     /**
@@ -79,6 +91,9 @@ class CuentaBancariaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $CuentaBancaria = Cuentabancarium::find($id);
+        $CuentaBancaria->Estado = 'INA';
+        $CuentaBancaria->save();
+        return Response($CuentaBancaria, 201);
     }
 }

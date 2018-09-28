@@ -67,6 +67,38 @@ $router->get('dragcuentacontable', ['uses' => 'CuentaContableController@drag']);
 $router->get('cuentapadre', ['uses' => 'CuentaContableController@MaxPadre']);
 $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContableController@getNumCuenta']);
 
+//Estacion
+$router->get('estacion', ['uses' => 'EstacionController@index']);
+$router->get('estacion/{id}', ['uses' => 'EstacionController@show']);
+$router->post('estacion', ['uses' => 'EstacionController@store']);
+$router->put('estacion/{id}', ['uses' => 'EstacionController@update']);
+$router->delete('estacion/{id}', ['uses' => 'EstacionController@destroy']);
+
+//Banco
+$router->get('banco', ['uses' => 'BancoController@index']);
+$router->get('banco/combo', ['uses' => 'BancoController@_Combo']);
+$router->get('banco/{id}', ['uses' => 'BancoController@show']);
+$router->post('banco', ['uses' => 'BancoController@store']);
+$router->put('banco/{id}', ['uses' => 'BancoController@update']);
+$router->delete('banco/{id}', ['uses' => 'BancoController@destroy']);
+
+//Tipo Cuenta Bancaria
+$router->get('tipocuentabancaria', ['uses' => 'TipoCuentaBancariaController@index']);
+$router->get('tipocuentabancaria/combo', ['uses' => 'TipoCuentaBancariaController@_Combo']);
+$router->get('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@show']);
+$router->post('tipocuentabancaria', ['uses' => 'TipoCuentaBancariaController@store']);
+$router->put('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@update']);
+$router->delete('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@destroy']);
+
+
+//Tipo Cuenta Bancaria
+$router->get('cuentabancaria', ['uses' => 'CuentaBancariaController@index']);
+//$router->get('cuentabancaria/combo', ['uses' => 'CuentaBancariaController@_Combo']);
+$router->get('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@show']);
+$router->post('cuentabancaria', ['uses' => 'CuentaBancariaController@store']);
+$router->put('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@update']);
+$router->delete('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@destroy']);
+
 //Transacciones
 $router->post('transaccion', ['uses' => 'TransaccionController@store']);
 $router->get('transaccion', ['uses' => 'TransaccionController@index']);
