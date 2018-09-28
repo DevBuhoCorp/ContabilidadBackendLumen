@@ -21,30 +21,29 @@ class TransaccionController extends Controller
                     $debe = $detalles[$i]["Debe"];
                     $haber = $detalles[$i]["Haber"];
                 }
-                if ($debe == $haber) {
-                    $carbon = Carbon::now('America/Guayaquil');
-                    $actual = $carbon->toDateTimeString();
-                    $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
-                    $fechadoc = $carbon2->toDateString();
-                    $transaccion = new Transaccion();
-                    $transaccion->Fecha = $actual;
-                    $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
-                    $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
-                    $transaccion->Debe = $debe;
-                    $transaccion->Haber = $haber;
-                    $transaccion->save();
-                    $documento = new Documentocontable();
-                    $documento->Fecha = $fechadoc;
-                    $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
-                    $documento->IDTransaccion = $transaccion->ID;
-                    $documento->save();
-                    for ($i = 0; $i < count($detalles); $i++) {
-                        $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
-                    }
-                    $detalles = Detalletransaccion::insert($detalles);
-                    return response()->json($detalles, 201);
+
+                $carbon = Carbon::now('America/Guayaquil');
+                $actual = $carbon->toDateTimeString();
+                $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
+                $fechadoc = $carbon2->toDateString();
+                $transaccion = new Transaccion();
+                $transaccion->Fecha = $actual;
+                $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
+                $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
+                $transaccion->Debe = $debe;
+                $transaccion->Haber = $haber;
+                $transaccion->save();
+                $documento = new Documentocontable();
+                $documento->Fecha = $fechadoc;
+                $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
+                $documento->IDTransaccion = $transaccion->ID;
+                $documento->save();
+                for ($i = 0; $i < count($detalles); $i++) {
+                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
                 }
-                return response()->json('Transaccion no cuadrada', 422 );
+                $detalles = Detalletransaccion::insert($detalles);
+                return response()->json($detalles, 201);
+
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
