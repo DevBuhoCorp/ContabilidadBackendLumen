@@ -45,7 +45,7 @@ class Cuentabancarium extends Eloquent
 	];
 
 	protected $dates = [
-		'Fecha'
+		'FechaApertura'
 	];
 
 	protected $fillable = [
