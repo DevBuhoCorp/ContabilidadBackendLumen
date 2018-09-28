@@ -49,7 +49,11 @@ class TransaccionController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $transacciones = Transaccion::where('Estado', 'ACT')->paginate($request->input('psize'));
+                $transacciones = Transaccion::
+                                            where('Estado', 'ACT')
+                                            ->paginate($request->input('psize'));
+
+
                 return response()->json($transacciones, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
