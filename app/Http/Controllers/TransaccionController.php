@@ -15,13 +15,6 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
                 $detalles = $request->all()['Detalle'];
-                $debe = 0;
-                $haber = 0;
-                for ($i = 0; $i < count($detalles); $i++) {
-                    $debe = $detalles[$i]["Debe"];
-                    $haber = $detalles[$i]["Haber"];
-                }
-
                 $carbon = Carbon::now('America/Guayaquil');
                 $actual = $carbon->toDateTimeString();
                 $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
@@ -30,8 +23,8 @@ class TransaccionController extends Controller
                 $transaccion->Fecha = $actual;
                 $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
                 $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
-                $transaccion->Debe = $debe;
-                $transaccion->Haber = $haber;
+                $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
+                $transaccion->Haber = $request->all()['Cabecera'][0]['Haber'];
                 $transaccion->save();
                 $documento = new Documentocontable();
                 $documento->Fecha = $fechadoc;
