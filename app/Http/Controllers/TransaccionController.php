@@ -50,7 +50,7 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
                 $transacciones = Transaccion::
-                    where('Estado', 'ACT')
+                    where('Estado', $request->input('Estado'))
                     ->paginate($request->input('psize'));
 
                 return response()->json($transacciones, 200);
@@ -80,6 +80,21 @@ class TransaccionController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
         }
+    }
+
+    public function update(Request $request,$id){
+        try {
+            if ($request->isJson()) {
+                $transaccion = Transaccion::find($id);
+                $transaccion->Estado = $request->input('Estado') ? 'ACT' : 'INA';
+                $transaccion->save();
+                return response()->json($transaccion, 200);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
     }
 
 }
