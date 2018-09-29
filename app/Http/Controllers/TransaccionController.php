@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
 use App\Models\Transaccion;
-use App\Models\Detalletransaccion;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
 class TransaccionController extends Controller
 {
     public function store(Request $request)
@@ -50,9 +50,8 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
                 $transacciones = Transaccion::
-                                            where('Estado', 'ACT')
-                                            ->paginate($request->input('psize'));
-
+                    where('Estado', 'ACT')
+                    ->paginate($request->input('psize'));
 
                 return response()->json($transacciones, 200);
             }
@@ -63,8 +62,24 @@ class TransaccionController extends Controller
 
     }
 
-
-
-
+    public function show($id, Request $request)
+    {
+        try {
+            if ($request->isJson()) {
+               /* $detalles = Detalletransaccion::
+                    where('IDTransaccion', $id)
+                    ->paginate($request->input('psize'));*/
+                
+                    $detalles = Detalletransaccion::join('cuentacontable as c','detalletransaccion.IDCuenta','=','c.ID')
+                    ->where('detalletransaccion.IDTransaccion',$id)
+                    ->select(DB::raw("c.Etiqueta as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
+                    ->paginate($request->input('psize'));
+                return response()->json($detalles, 200);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+    }
 
 }
