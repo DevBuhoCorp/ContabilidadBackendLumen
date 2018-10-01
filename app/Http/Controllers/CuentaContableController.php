@@ -142,9 +142,8 @@ class CuentaContableController extends Controller
             $numerocuenta = Cuentacontable::
                 join('plancontable', 'IDCuenta', '=', 'CuentaContable.ID')
                 ->where('IDModelo', $request->input('Modelo'))
-                ->whereNull('IDPadre')->get();
-                //->max('NumeroCuenta');
-            return response()->json($numerocuenta, 200);
+                ->whereNull('IDPadre')->max(DB::raw('CAST(NumeroCuenta AS SIGNED)'));
+            return response()->json($numerocuenta + 1, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
         }

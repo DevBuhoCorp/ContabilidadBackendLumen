@@ -15,8 +15,12 @@ class CuentaBancariaController extends Controller
      */
     public function index(Request $request)
     {
-        $CuentaBancaria = Cuentabancarium::where('IDEmpresa', $request->input('empresa') )
-                                            ->paginate($request->input('psize'));
+        $CuentaBancaria = Cuentabancarium::
+                        join('Banco','Banco.ID','=' ,'IDBanco')
+                        ->join('TipoCuentaBancaria','TipoCuentaBancaria.ID','=' ,'IDTipoCuenta')
+                        ->where('IDEmpresa', $request->input('empresa') )
+                        ->select('CuentaBancaria.*','Banco.Descripcion as Banco', 'TipoCuentaBancaria.Descripcion as TipoCuenta')
+                        ->paginate($request->input('psize'));
         return Response($CuentaBancaria, 200);
     }
 
