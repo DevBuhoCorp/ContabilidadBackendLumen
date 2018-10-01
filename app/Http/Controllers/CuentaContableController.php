@@ -29,9 +29,13 @@ class CuentaContableController extends Controller
         try {
             if ($request->isJson()) {
                 $cuentas = PlanContable::join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+                    ->where('cuentacontable.IDGrupoCuenta',2)
                     ->where('plancontable.IDModelo', $request->input('Modelo'))
+                    
                     //->select(DB::raw('cuentacontable.ID,cuentacontable.NumeroCuenta,cuentacontable.Etiqueta'))->get();
-                    ->select(DB::raw("cuentacontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->get();
+                    ->select(DB::raw("cuentacontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->orderBy('NumeroCuenta', 'asc')
+                    ->get();;
+                    
 
 
                 /*$cuentas = $cuentas->map(function ($row) {
