@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
 use App\Models\Transaccion;
+use App\Models\Cuentacontable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -34,6 +35,12 @@ class TransaccionController extends Controller
                 $documento->save();
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+                    $cuentacontable = Cuentacontable::find($detalles[$i]["IDCuenta"]);
+                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                    $cuentacontable->save();
+                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                    $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
+                    $cuentacontablepadre->save();
                 }
                 $detalles = Detalletransaccion::insert($detalles);
                 return response()->json($detalles, 201);
