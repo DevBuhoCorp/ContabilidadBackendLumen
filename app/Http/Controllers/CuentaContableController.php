@@ -135,10 +135,15 @@ class CuentaContableController extends Controller
 
     }
 
-    public function MaxPadre()
+    public function MaxPadre(Request $request)
     {
         try {
-            $numerocuenta = (Cuentacontable::whereNull('IDPadre')->max('NumeroCuenta')) + 1;
+            //$numerocuenta = (Cuentacontable::whereNull('IDPadre')->max('NumeroCuenta')) + 1;
+            $numerocuenta = Cuentacontable::
+                join('plancontable', 'IDCuenta', '=', 'CuentaContable.ID')
+                ->where('IDModelo', $request->input('Modelo'))
+                ->whereNull('IDPadre')->get();
+                //->max('NumeroCuenta');
             return response()->json($numerocuenta, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
