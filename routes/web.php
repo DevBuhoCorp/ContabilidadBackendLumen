@@ -102,3 +102,6 @@ $router->delete('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@dest
 //Transacciones
 $router->post('transaccion', ['uses' => 'TransaccionController@store']);
 $router->get('transaccion', ['uses' => 'TransaccionController@index']);
+$router->get('transaccion/{id}', ['uses' => 'TransaccionController@show']);
+$router->get('totaltrans', ['uses' => 'TransaccionController@total']);
+$router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
