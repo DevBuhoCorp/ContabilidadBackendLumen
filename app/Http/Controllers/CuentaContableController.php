@@ -67,6 +67,7 @@ class CuentaContableController extends Controller
     {
         try {
             if ($request->isJson()) {
+
                 $cuenta = Cuentacontable::create($request->all());
                 $cuenta->save();
 
