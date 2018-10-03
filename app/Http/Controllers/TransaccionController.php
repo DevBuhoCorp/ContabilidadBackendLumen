@@ -36,7 +36,7 @@ class TransaccionController extends Controller
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
                     $cuentacontable = Cuentacontable::find($detalles[$i]["IDCuenta"]);
-                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]); 
                     $cuentacontable->save();
                     $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
                     $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
