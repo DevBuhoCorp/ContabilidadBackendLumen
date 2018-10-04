@@ -6,6 +6,7 @@ use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
 use App\Models\Transaccion;
 use App\Models\Cuentacontable;
+use App\Models\Plancontable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,12 +36,19 @@ class TransaccionController extends Controller
                 $documento->save();
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
-                    $cuentacontable = Cuentacontable::find($detalles[$i]["IDCuenta"]);
+                    $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
+                    $cuentacontable = Cuentacontable::find($planc->IDCuenta);
                     $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]); 
                     $cuentacontable->save();
-                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                    /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
                     $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
-                    $cuentacontablepadre->save();
+                    $cuentacontablepadre->save();*/
+                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                    do {
+                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                        $cuentacontablepadre->save();
+                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+                    } while ($cuentacontablepadre);
                 }
                 $detalles = Detalletransaccion::insert($detalles);
                 return response()->json($detalles, 201);
@@ -77,9 +85,10 @@ class TransaccionController extends Controller
                     where('IDTransaccion', $id)
                     ->paginate($request->input('psize'));*/
 
-                $detalles = Detalletransaccion::join('cuentacontable as c', 'detalletransaccion.IDCuenta', '=', 'c.ID')
+                $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
+                    ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
                     ->where('detalletransaccion.IDTransaccion', $id)
-                    ->select(DB::raw("c.Etiqueta as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
+                    ->select(DB::raw("cc.Etiqueta as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
                     ->paginate($request->input('psize'));
                 return response()->json($detalles, 200);
             }

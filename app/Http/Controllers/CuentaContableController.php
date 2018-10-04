@@ -33,7 +33,7 @@ class CuentaContableController extends Controller
                     ->where('plancontable.IDModelo', $request->input('Modelo'))
                     
                     //->select(DB::raw('cuentacontable.ID,cuentacontable.NumeroCuenta,cuentacontable.Etiqueta'))->get();
-                    ->select(DB::raw("cuentacontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->orderBy('NumeroCuenta', 'asc')
+                    ->select(DB::raw("plancontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->orderBy('NumeroCuenta', 'asc')
                     ->get();;
                     
 
