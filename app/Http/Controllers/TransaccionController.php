@@ -88,7 +88,7 @@ class TransaccionController extends Controller
                 $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
                     ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
                     ->where('detalletransaccion.IDTransaccion', $id)
-                    ->select(DB::raw("cc.Etiqueta as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
+                    ->select(DB::raw("CONCAT(cc.NumeroCuenta, ' ',cc.Etiqueta) as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
                     ->paginate($request->input('psize'));
                 return response()->json($detalles, 200);
             }
