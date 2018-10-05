@@ -98,6 +98,30 @@ class TransaccionController extends Controller
         }
     }
 
+    public function transporcuenta($id, Request $request)
+    {
+        try {
+            if ($request->isJson()) {
+                $totales = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
+                ->where('pc.IDCuenta', $id)->get();                
+                $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
+                    ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
+                    ->join('transaccion as t','detalletransaccion.IDTransaccion','=','t.ID')
+                    ->where('pc.IDCuenta', $id)
+                    ->select(DB::raw("detalletransaccion.Debe,detalletransaccion.Haber,t.Etiqueta as Transaccion, t.Fecha"))
+                    ->paginate($request->input('psize'));
+                $detalles->TotalDebe = $detalles->sum('Debe');
+                $sumadebe = $totales->sum('Debe');
+                $sumahaber = $totales->sum('Haber');
+                //return response()->json($detalles, 200);
+                return response()->json(['detalles' => $detalles, 'Debe' => $sumadebe, 'Haber' => $sumahaber, 'Saldo' => $sumadebe - $sumahaber], 200);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+    }
+
     public function update(Request $request, $id)
     {
         try {
