@@ -69,9 +69,16 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
 
-//                dd($request->all());
-
                 $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', 1);
+
+                if($request->input('FInicio')){
+                    $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
+                    $FFin = ($request->input('FFin'))?  Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
+                    $query->whereBetween(DB::raw('date(Fecha)'),[ $FInicio , $FFin ]);
+                }elseif ($request->input('FFin')){
+                    $FFin = Carbon::parse($request->input('FFin'))->toDateString();
+                    $query->where(DB::raw('date(Fecha)'), '<=', $FFin);
+                }
 
                 if ($request->input('ttransaccion')) {
                     switch ($request->input('ttransaccion')) {
@@ -80,20 +87,18 @@ class TransaccionController extends Controller
                                 $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get([ 'ID' ]);
                                 $query = $query->whereIn('IDEstacion', $idsEstacion);
                             } else {
-                                $query = $query->whereNotNull('IDEstacion');
+                                $query = $query->WhereNotNull('IDEstacion');
                             }
                             break;
                         case "manual":
                             $query = $query->whereNull('IDEstacion');
                             break;
                     }
-
                 }
-
-
+                $totales = [ "Debe" => $query->sum('Debe'), "Haber" => $query->sum('Haber')];
                 $transacciones = $query->paginate($request->input('psize'));
 
-                return response()->json($transacciones, 200);
+                return response()->json([ "data" => $transacciones, "totales" => $totales ], 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
@@ -129,12 +134,45 @@ class TransaccionController extends Controller
             if ($request->isJson()) {
                 $totales = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
                 ->where('pc.IDCuenta', $id)->get();                
-                $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
+
+                $query = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
                     ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
                     ->join('transaccion as t','detalletransaccion.IDTransaccion','=','t.ID')
                     ->where('pc.IDCuenta', $id)
-                    ->select(DB::raw("detalletransaccion.Debe,detalletransaccion.Haber,t.Etiqueta as Transaccion, t.Fecha"))
-                    ->paginate($request->input('psize'));
+                    ->select(DB::raw("detalletransaccion.Debe,detalletransaccion.Haber,t.Etiqueta as Transaccion, t.Fecha"));
+
+
+                if($request->input('FInicio')){
+                    $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
+                    $FFin = ($request->input('FFin'))?  Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
+                    $query->whereBetween(DB::raw('date(t.Fecha)'),[ $FInicio , $FFin ]);
+                }elseif ($request->input('FFin')){
+                    $FFin = Carbon::parse($request->input('FFin'))->toDateString();
+                    $query->where(DB::raw('date(t.Fecha)'), '<=', $FFin);
+                }
+
+                if ($request->input('ttransaccion')) {
+                    switch ($request->input('ttransaccion')) {
+                        case "app":
+                            if ($request->input('app')) {
+                                $idsEstacion = Estacion::where('t.IDAplicacion', $request->input('app'))->get([ 'ID' ]);
+                                $query = $query->whereIn('t.IDEstacion', $idsEstacion);
+                            } else {
+                                $query = $query->WhereNotNull('t.IDEstacion');
+                            }
+                            break;
+                        case "manual":
+                            $query = $query->whereNull('t.IDEstacion');
+                            break;
+                    }
+                }
+
+
+
+
+
+                $detalles = $query->paginate($request->input('psize'));
+
                 $detalles->TotalDebe = $detalles->sum('Debe');
                 $sumadebe = $totales->sum('Debe');
                 $sumahaber = $totales->sum('Haber');
