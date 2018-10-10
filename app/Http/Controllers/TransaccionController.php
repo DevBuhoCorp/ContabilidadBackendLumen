@@ -69,9 +69,9 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
 
-                dd($request->all());
+//                dd($request->all());
 
-                $query = Transaccion::where('Estado', 'ACT')->where('IDEmpresa', 2);
+                $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', 1);
 
                 if ($request->input('ttransaccion')) {
                     switch ($request->input('ttransaccion')) {
