@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
+use App\Models\Estacion;
 use App\Models\Transaccion;
 use App\Models\Cuentacontable;
 use App\Models\Plancontable;
@@ -24,6 +25,8 @@ class TransaccionController extends Controller
                 $fechadoc = $carbon2->toDateString();
                 $transaccion = new Transaccion();
                 $transaccion->Fecha = $actual;
+                // Modificar
+                $transaccion->IDEmpresa = 2;
                 $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
                 $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
                 $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
@@ -38,7 +41,7 @@ class TransaccionController extends Controller
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
                     $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
                     $cuentacontable = Cuentacontable::find($planc->IDCuenta);
-                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]); 
+                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
                     $cuentacontable->save();
                     /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
                     $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
@@ -65,8 +68,30 @@ class TransaccionController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $transacciones = Transaccion::where('Estado', $request->input('Estado'))
-                    ->paginate($request->input('psize'));
+
+//                dd($request->all());
+
+                $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', 1);
+
+                if ($request->input('ttransaccion')) {
+                    switch ($request->input('ttransaccion')) {
+                        case "app":
+                            if ($request->input('app')) {
+                                $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get([ 'ID' ]);
+                                $query = $query->whereIn('IDEstacion', $idsEstacion);
+                            } else {
+                                $query = $query->whereNotNull('IDEstacion');
+                            }
+                            break;
+                        case "manual":
+                            $query = $query->whereNull('IDEstacion');
+                            break;
+                    }
+
+                }
+
+
+                $transacciones = $query->paginate($request->input('psize'));
 
                 return response()->json($transacciones, 200);
             }
@@ -81,12 +106,12 @@ class TransaccionController extends Controller
     {
         try {
             if ($request->isJson()) {
-               /* $detalles = Detalletransaccion::
-                    where('IDTransaccion', $id)
-                    ->paginate($request->input('psize'));*/
+                /* $detalles = Detalletransaccion::
+                     where('IDTransaccion', $id)
+                     ->paginate($request->input('psize'));*/
 
                 $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
-                    ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
+                    ->join('cuentacontable as cc', 'pc.IDCuenta', '=', 'cc.ID')
                     ->where('detalletransaccion.IDTransaccion', $id)
                     ->select(DB::raw("CONCAT(cc.NumeroCuenta, ' ',cc.Etiqueta) as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
                     ->paginate($request->input('psize'));

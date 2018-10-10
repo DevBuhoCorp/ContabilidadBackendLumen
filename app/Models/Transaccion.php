@@ -38,7 +38,8 @@ class Transaccion extends Eloquent
 
 	protected $fillable = [
 		'Fecha',
-		'IDEstacion'
+		'IDEstacion',
+		'IDEmpresa'
 	];
 
 	public function estacion()

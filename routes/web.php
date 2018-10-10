@@ -28,6 +28,7 @@ $router->delete('empresa/{id}', ['uses' => 'EmpresaController@destroy']);
 
 //Catálogo Aplicación
 $router->get('aplicacion', ['uses' => 'AplicacionController@index']);
+$router->get('comboaplicacion', ['uses' => 'AplicacionController@combo']);
 $router->get('aplicacion/{id}', ['uses' => 'AplicacionController@show']);
 $router->post('aplicacion', ['uses' => 'AplicacionController@store']);
 $router->put('aplicacion/{id}', ['uses' => 'AplicacionController@update']);
@@ -100,8 +101,8 @@ $router->put('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@update'
 $router->delete('cuentabancaria/{id}', ['uses' => 'CuentaBancariaController@destroy']);
 
 //Transacciones
-$router->post('transaccion', ['uses' => 'TransaccionController@store']);
 $router->get('transaccion', ['uses' => 'TransaccionController@index']);
+$router->post('transaccion', ['uses' => 'TransaccionController@store']);
 $router->get('transaccion/{id}', ['uses' => 'TransaccionController@show']);
 $router->get('transporcuenta/{id}', ['uses' => 'TransaccionController@transporcuenta']);
 $router->get('totaltrans', ['uses' => 'TransaccionController@total']);

@@ -30,6 +30,26 @@ class AplicacionController extends Controller
         }
 
     }
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function combo(Request $request)
+    {
+        try {
+            if ($request->isJson()) {
+                $apps = Aplicacion::
+                    join('empresaaplicacion as eapp', 'eapp.IDAplicacion', '=', 'aplicacion.ID')
+                    ->where('eapp.IDEmpresa', $request->input('empresa'))->get([ 'Aplicacion.ID', 'Aplicacion.Descripcion' ]);
+                return response()->json($apps, 200);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
 
     /**
      * Store a newly created resource in storage.
