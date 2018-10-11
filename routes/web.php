@@ -107,3 +107,6 @@ $router->get('transaccion/{id}', ['uses' => 'TransaccionController@show']);
 $router->get('transporcuenta/{id}', ['uses' => 'TransaccionController@transporcuenta']);
 $router->get('totaltrans', ['uses' => 'TransaccionController@total']);
 $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
+
+// Balances Comprobacion
+$router->get('balance_comprobacion/{modplanc}', ['uses' => 'TransaccionController@balanceComprobacion']);

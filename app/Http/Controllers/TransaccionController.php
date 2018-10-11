@@ -215,4 +215,9 @@ class TransaccionController extends Controller
         }
     }
 
+    public function balanceComprobacion(Request $request, $modplanc){
+        $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
+        return Response($rows,200);
+    }
+
 }
