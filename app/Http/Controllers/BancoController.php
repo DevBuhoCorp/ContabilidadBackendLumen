@@ -87,8 +87,7 @@ class BancoController extends Controller
     public function update(Request $request, $id)
     {
         $Banco = Banco::find($id);
-        $Banco->Descripcion = $request->input('Descripcion');
-        $Banco->Observacion = $request->input('Observacion');
+        $Banco->fill($request->all());
         $Banco->Estado = $request->input("Estado") ? 'ACT' : 'INA';
         $Banco->save();
         return Response($Banco, 200);

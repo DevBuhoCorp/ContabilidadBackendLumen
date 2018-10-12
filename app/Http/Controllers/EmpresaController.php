@@ -120,9 +120,8 @@ class EmpresaController extends Controller
         try {
             if ($request->isJson()) {
                 $empresa = Empresa::find($id);
+                $empresa->fill($request->all());
                 $empresa->Estado = $request->input('Estado') ? 'ACT' : 'INA';
-                $empresa->Observacion = $request->input('Observacion');
-                $empresa->Descripcion = $request->input('Descripcion');
                 $empresa->save();
                 return response()->json($empresa, 201);
             }
