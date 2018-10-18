@@ -201,6 +201,7 @@ class CuentaContableController extends Controller
                 $cuenta->Etiqueta = $request->input('Etiqueta');
                 $cuenta->Estado = $request->input('Estado');
                 $cuenta->IDDiario = $request->input('IDDiario');
+                $cuenta->IDTipoEstado = $request->input('IDTipoEstado');
                 $cuenta->save();
                 return response()->json($cuenta, 200);
             }
