@@ -110,6 +110,7 @@ $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
 
 // Balances Comprobacion
 $router->get('balance_comprobacion/{modplanc}', ['uses' => 'TransaccionController@balanceComprobacion']);
+$router->get('estadoresultado/{modplanc}', ['uses' => 'TransaccionController@estadoresultado']);
 
 //TiposEstado
 $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
