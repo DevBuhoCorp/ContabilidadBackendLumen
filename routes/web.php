@@ -114,3 +114,6 @@ $router->get('estadoresultado/{modplanc}', ['uses' => 'TransaccionController@est
 
 //TiposEstado
 $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
+
+/* Reportes */
+$router->get('report_estadoresultado/{modplancontable}', [ 'uses' => 'ReportEstadoController@estado_resultado' ]);
