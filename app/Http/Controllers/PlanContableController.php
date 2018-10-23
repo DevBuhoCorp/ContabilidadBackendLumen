@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cuentabalance;
 use App\Models\Cuentacontable;
 use App\Models\Modeloplancontable;
 use Illuminate\Http\Request;
@@ -110,6 +111,51 @@ class PlanContableController extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param  int $modelo
+     * @param  int $balance
+     * @return \Illuminate\Http\Response
+     */
+    public function Modelo_Balance_PlanCuenta( Request $request )
+    {
+        try {
+            $cuentas = Cuentabalance::
+                join('plancontable', 'IDPlanContable', '=', 'plancontable.ID')
+                ->where('IDBalance', $request->input("balance") )
+                ->where('IDModelo', $request->input("modelo") )
+                ->get(['plancontable.ID']);
+            return response()->json($cuentas, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int $modelo
+     * @param  int $balance
+     * @return \Illuminate\Http\Response
+     */
+    public function treePlanCuenta( Request $request )
+    {
+        try {
+            $cuentasBruto = Cuentacontable::
+            join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
+                ->where('plancontable.IDModelo', $request->input("modelo") )
+                ->get(['cuentacontable.ID as data', 'plancontable.ID', DB::raw(" CONCAT(cuentacontable.NumeroCuenta,' ', cuentacontable.Etiqueta) as label"), 'NumeroCuenta as numerocuenta', 'cuentacontable.IDGrupoCuenta','cuentacontable.IDDiario as diario', 'IDPadre']);
+            $cuentasPadre = $cuentasBruto->where('IDPadre', null);
+            $cuentas = $this->to_tree($cuentasPadre, $cuentasBruto);
+            return response()->json($cuentas, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
@@ -123,7 +169,7 @@ class PlanContableController extends Controller
                     ->where('plancontable.IDModelo', $modelo['ID'])
                     ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
                 $cuentasPadre = $cuentasBruto->where('IDPadre', null);
-                $modelo["cuentas"] = $this->to_tree($cuentasPadre, $cuentasBruto);
+                $modelo["cuentas"] = $this->to_children($cuentasPadre, $cuentasBruto);
             }
             return response()->json($modelos, 200);
         } catch (ModelNotFoundException $e) {
@@ -132,12 +178,23 @@ class PlanContableController extends Controller
 
     }
 
-    public function to_tree($parents, $all)
+    public function to_children($parents, $all)
     {
         $array = collect();
         foreach ($parents as $parent) {
             if ($all->contains('IDPadre', $parent["ID"])) {
                 $parent["children"] = $this->to_tree($all->where('IDPadre', $parent["ID"]), $all);
+            }
+            $array->push($parent);
+        }
+        return $array;
+    }
+
+    public function to_tree($parents, $all) {
+        $array = collect();
+        foreach ($parents as $parent) {
+            if ($all->contains('IDPadre', $parent["data"])) {
+                $parent["children"] = $this->to_tree($all->where('IDPadre', $parent["data"]), $all);
             }
             $array->push($parent);
         }

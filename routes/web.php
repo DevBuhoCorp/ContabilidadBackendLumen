@@ -57,6 +57,8 @@ $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableControl
 $router->get('plancontable', ['uses' => 'PlanContableController@index']);
 $router->get('numerocuenta', ['uses' => 'PlanContableController@numerocuenta']);
 $router->get('app/plancontable/cuentacontable', ['uses' => 'PlanContableController@apiPlanCuenta']);
+$router->get('plancontable/tree', ['uses' => 'PlanContableController@treePlanCuenta']);
+$router->get('plancontable/cuentabalance', ['uses' => 'PlanContableController@Modelo_Balance_PlanCuenta']);
 
 //CuentaContable
 $router->get('cuentacontable', ['uses' => 'CuentaContableController@index']);
@@ -111,9 +113,14 @@ $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
 // Balances Comprobacion
 $router->get('balance_comprobacion/{modplanc}', ['uses' => 'TransaccionController@balanceComprobacion']);
 $router->get('estadoresultado/{modplanc}', ['uses' => 'TransaccionController@estadoresultado']);
+$router->get('combobalance', ['uses' => 'TipoBalanceController@combo']);
 
 //TiposEstado
 $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
 
 /* Reportes */
 $router->get('report_estadoresultado/{modplancontable}', [ 'uses' => 'ReportEstadoController@estado_resultado' ]);
+
+
+/* Cuenta Balance */
+$router->post('cuentabalance/{modelo}/{balance}', ['uses' => 'TipoBalanceController@store']);
