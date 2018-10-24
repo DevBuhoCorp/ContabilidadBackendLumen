@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cuentacontable;
+use App\Models\Cuentabalance;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -75,5 +76,27 @@ class ReportEstadoController extends Controller
         $utilidadupd->Saldo = $uneta;
         $utilidadupd->save();
         return response()->json(['resultado' => $resultado, 'resultado2' => $resultado2], 201);
+    }
+
+    public function balancefinal(){
+        $activos = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
+        ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+        ->where('cuentacontable.NumeroCuenta','like','1%')
+        ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
+
+        $pasivos = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
+        ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+        ->where('cuentacontable.NumeroCuenta','like','2%')
+        ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
+
+        $patrimonio = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
+        ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+        ->where('cuentacontable.NumeroCuenta','like','3%')
+        ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
+
+        return response()->json(['activos' => $activos, 'pasivos' => $pasivos, 'patrimonio' => $patrimonio,
+        'sumaactivos' => $activos->sum('Saldo'), 'sumapasivo' => $pasivos->sum('Saldo'),'sumapatrimonio' => $patrimonio->sum('Saldo')], 201);
+        
+
     }
 }
