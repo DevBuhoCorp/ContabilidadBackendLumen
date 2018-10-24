@@ -215,9 +215,23 @@ class TransaccionController extends Controller
         }
     }
 
-    public function balanceComprobacion(Request $request, $modplanc){
-        $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
-        return Response($rows,200);
+    public static function balanceComprobacion( $modplanc){
+       // $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
+       $comprobacion = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+        ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
+        ->join('detalletransaccion','plancontable.ID','=','detalletransaccion.IDCuenta')
+        ->join('transaccion','detalletransaccion.IDTransaccion','=','transaccion.ID')
+        ->where('modeloplancontable.ID',$modplanc)
+        ->where('transaccion.Estado','ACT')
+        ->groupBy('cuentacontable.ID')
+        ->orderBy('cuentacontable.NumeroCuenta')
+        ->get([DB::raw("cuentacontable.ID,
+		CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) Etiqueta,		
+		sum(detalletransaccion.Debe) Debe,
+		sum(detalletransaccion.Haber) Haber,
+		IF(cuentacontable.Saldo > 0, cuentacontable.Saldo, 0) Deudor,
+		IF(cuentacontable.Saldo < 0, ABS(cuentacontable.Saldo), 0) Acreedor")]);
+        return $comprobacion;
     }
 
     public function estadoresultado(Request $request, $modplanc){

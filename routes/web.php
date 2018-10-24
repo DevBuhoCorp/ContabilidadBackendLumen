@@ -121,7 +121,7 @@ $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
 /* Reportes */
 $router->get('report_estadoresultado/{modplancontable}', [ 'uses' => 'ReportEstadoController@estado_resultado' ]);
 $router->get('report_balancefinal', [ 'uses' => 'ReportEstadoController@balancefinal' ]);
-
+$router->get('hojabalance/{modplanc}', [ 'uses' => 'ReportEstadoController@hojabalance' ]);
 
 /* Cuenta Balance */
 $router->post('cuentabalance/{modelo}/{balance}', ['uses' => 'TipoBalanceController@store']);
