@@ -18,6 +18,16 @@ $router->get('/', function () use ($router) {
 $router->get('/key', function () {
     return str_random(32);
 });
+
+/* Rol */
+$router->get('rol', ['uses' => 'RolController@index']);
+$router->get('rol/{id}', ['uses' => 'RolController@show']);
+$router->get('comborol', ['uses' => 'RolController@combo']);
+$router->post('rol', ['uses' => 'RolController@store']);
+$router->put('rol/{id}', ['uses' => 'RolController@update']);
+$router->delete('rol/{id}', ['uses' => 'RolController@destroy']);
+
+
 //Catálogo Empresa
 $router->get('empresa', ['uses' => 'EmpresaController@index']);
 $router->get('empresa/{id}', ['uses' => 'EmpresaController@show']);
