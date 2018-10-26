@@ -31,6 +31,7 @@ class ReportEstadoController extends Controller
             ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
             ->where('modeloplancontable.ID', $modplancontable)
             ->where('cuentacontable.IDTipoEstado', 1)
+            ->where('cuentacontable.IDGrupoCuenta', 2)
             ->where('cuentacontable.Saldo', '!=', 0)
             ->groupBy('cuentacontable.ID')
             ->orderBy('cuentacontable.NumeroCuenta')
@@ -66,11 +67,6 @@ class ReportEstadoController extends Controller
         ->where('cuentacontable.NumeroCuenta', '2.1.4')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $impuestoupd->Saldo = $impuesto * -1;
         $impuestoupd->save();
-        $reservaupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->where('plancontable.IDModelo', $modplancontable)
-        ->where('cuentacontable.NumeroCuenta', '3.2')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
-        $reservaupd->Saldo = $reserva * -1;
-        $reservaupd->save();
         $reservaupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('plancontable.IDModelo', $modplancontable)
         ->where('cuentacontable.NumeroCuenta', '3.2')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
