@@ -125,3 +125,10 @@ $router->get('hojabalance/{modplanc}', [ 'uses' => 'ReportEstadoController@hojab
 
 /* Cuenta Balance */
 $router->post('cuentabalance/{modelo}/{balance}', ['uses' => 'TipoBalanceController@store']);
+
+//Exportaciones
+$router->get('export_librodiario', ['uses' => 'ExportController@exportlibrodiario']);
+$router->get('export_detalletrans/{id}', ['uses' => 'ExportController@exportdetalletrans']);
+$router->get('export_libromayor/{id}', ['uses' => 'ExportController@exportlibromayor']);
+$router->get('export_balancefinal', ['uses' => 'ExportController@exportbalancefinal']);
+$router->get('export_estadoresultado/{id}', ['uses' => 'ExportController@exportestadoresultado']);
