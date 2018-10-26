@@ -19,10 +19,17 @@ $router->get('/key', function () {
     return str_random(32);
 });
 
+/* Usuario */
+$router->get('usuario', ['uses' => 'UsuarioController@index']);
+$router->get('usuario/{id}', ['uses' => 'UsuarioController@show']);
+$router->post('usuario', ['uses' => 'UsuarioController@store']);
+$router->put('usuario/{id}', ['uses' => 'UsuarioController@update']);
+$router->delete('usuario/{id}', ['uses' => 'UsuarioController@destroy']);
+
 /* Rol */
 $router->get('rol', ['uses' => 'RolController@index']);
 $router->get('rol/{id}', ['uses' => 'RolController@show']);
-$router->get('comborol', ['uses' => 'RolController@combo']);
+$router->get('rol/combo', ['uses' => 'RolController@combo']);
 $router->post('rol', ['uses' => 'RolController@store']);
 $router->put('rol/{id}', ['uses' => 'RolController@update']);
 $router->delete('rol/{id}', ['uses' => 'RolController@destroy']);
