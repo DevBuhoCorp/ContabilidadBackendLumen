@@ -149,4 +149,5 @@ $router->get('export_balancefinal', ['uses' => 'ExportController@exportbalancefi
 $router->get('export_estadoresultado/{id}', ['uses' => 'ExportController@exportestadoresultado']);
 
 //Dashboard
-$router->get('transpormes', ['uses' => 'DashboardController@transpormes']);
+$router->get('transpormes/{empresa}', ['uses' => 'DashboardController@transpormes']);
+$router->get('topcuentas/{modelo}', ['uses' => 'DashboardController@topcuentas']);
