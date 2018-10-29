@@ -183,7 +183,7 @@ class PlanContableController extends Controller
         $array = collect();
         foreach ($parents as $parent) {
             if ($all->contains('IDPadre', $parent["ID"])) {
-                $parent["children"] = $this->to_tree($all->where('IDPadre', $parent["ID"]), $all);
+                $parent["children"] = $this->to_children($all->where('IDPadre', $parent["ID"]), $all);
             }
             $array->push($parent);
         }
