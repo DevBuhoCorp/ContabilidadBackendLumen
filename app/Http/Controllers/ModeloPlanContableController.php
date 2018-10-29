@@ -60,6 +60,12 @@ class ModeloPlanContableController extends Controller
                 $modelopc = Modeloplancontable::create($request->all());
                 $modelopc->Estado = $modelopc->Estado ? 'ACT' : 'INA';
                 $modelopc->save();
+
+                
+
+
+
+
                 return response()->json($modelopc, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
