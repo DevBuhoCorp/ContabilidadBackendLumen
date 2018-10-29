@@ -74,6 +74,7 @@ $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableControl
 $router->get('plancontable', ['uses' => 'PlanContableController@index']);
 $router->get('numerocuenta', ['uses' => 'PlanContableController@numerocuenta']);
 $router->get('app/plancontable/cuentacontable', ['uses' => 'PlanContableController@apiPlanCuenta']);
+$router->get('plancontable/test', ['uses' => 'PlanContableController@PlanCuenta']);
 $router->get('plancontable/tree', ['uses' => 'PlanContableController@treePlanCuenta']);
 $router->get('plancontable/cuentabalance', ['uses' => 'PlanContableController@Modelo_Balance_PlanCuenta']);
 

@@ -7,34 +7,29 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model as Eloquent;
+use Reliese\Database\Eloquent\Model as Eloquent;
 
 /**
- * Class Rol
+ * Class Parametro
  * 
  * @property int $ID
+ * @property int $Valor
  * @property string $Descripcion
- * @property string $Observacion
+ * @property string $Abr
  * @property string $Estado
- * 
- * @property \Illuminate\Database\Eloquent\Collection $users
  *
  * @package App\Models
  */
-class Rol extends Eloquent
+class Parametro extends Eloquent
 {
-	protected $table = 'rol';
+	protected $table = 'parametro';
 	protected $primaryKey = 'ID';
 	public $timestamps = false;
 
 	protected $fillable = [
 		'Descripcion',
-		'Observacion',
+		'Abr',
+		'Valor',
 		'Estado'
 	];
-
-	public function users()
-	{
-		return $this->hasMany(\App\Models\User::class, 'IDRol');
-	}
 }

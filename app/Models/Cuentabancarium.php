@@ -2,7 +2,7 @@
 
 /**
  * Created by Reliese Model.
- * Date: Wed, 26 Sep 2018 22:16:25 +0000.
+ * Date: Mon, 29 Oct 2018 16:47:59 +0000.
  */
 
 namespace App\Models;
@@ -45,7 +45,7 @@ class Cuentabancarium extends Eloquent
 	];
 
 	protected $dates = [
-		'FechaApertura' => 'date:Y-m-d'
+		'FechaApertura'
 	];
 
 	protected $fillable = [
