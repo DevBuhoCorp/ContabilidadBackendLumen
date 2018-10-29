@@ -98,9 +98,9 @@ class PlanContableController extends Controller
     public function numerocuenta(Request $request)
     {
         try {
-                $planc = DB::select('call getNumCuenta(?,?)', [$request->input('padre'), $request->input('plancontable')]);
-                return response()->json($planc, 200);
-            
+            $planc = DB::select('call getNumCuenta(?,?)', [$request->input('padre'), $request->input('plancontable')]);
+            return response()->json($planc, 200);
+
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
@@ -115,13 +115,13 @@ class PlanContableController extends Controller
      * @param  int $balance
      * @return \Illuminate\Http\Response
      */
-    public function Modelo_Balance_PlanCuenta( Request $request )
+    public function Modelo_Balance_PlanCuenta(Request $request)
     {
         try {
             $cuentas = Cuentabalance::
-                join('plancontable', 'IDPlanContable', '=', 'plancontable.ID')
-                ->where('IDBalance', $request->input("balance") )
-                ->where('IDModelo', $request->input("modelo") )
+            join('plancontable', 'IDPlanContable', '=', 'plancontable.ID')
+                ->where('IDBalance', $request->input("balance"))
+                ->where('IDModelo', $request->input("modelo"))
                 ->get(['plancontable.ID']);
             return response()->json($cuentas, 200);
         } catch (ModelNotFoundException $e) {
@@ -137,13 +137,13 @@ class PlanContableController extends Controller
      * @param  int $balance
      * @return \Illuminate\Http\Response
      */
-    public function treePlanCuenta( Request $request )
+    public function treePlanCuenta(Request $request)
     {
         try {
             $cuentasBruto = Cuentacontable::
             join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
-                ->where('plancontable.IDModelo', $request->input("modelo") )
-                ->get(['cuentacontable.ID as data', 'plancontable.ID', DB::raw(" CONCAT(cuentacontable.NumeroCuenta,' ', cuentacontable.Etiqueta) as label"), 'NumeroCuenta as numerocuenta', 'cuentacontable.IDGrupoCuenta','cuentacontable.IDDiario as diario', 'IDPadre']);
+                ->where('plancontable.IDModelo', $request->input("modelo"))
+                ->get(['cuentacontable.ID as data', 'plancontable.ID', DB::raw(" CONCAT(cuentacontable.NumeroCuenta,' ', cuentacontable.Etiqueta) as label"), 'NumeroCuenta as numerocuenta', 'cuentacontable.IDGrupoCuenta', 'cuentacontable.IDDiario as diario', 'IDPadre']);
             $cuentasPadre = $cuentasBruto->where('IDPadre', null);
             $cuentas = $this->to_tree($cuentasPadre, $cuentasBruto);
             return response()->json($cuentas, 200);
@@ -165,7 +165,7 @@ class PlanContableController extends Controller
             $modelos = Modeloplancontable::where('Estado', 'ACT')->get();
             foreach ($modelos as $modelo) {
                 $cuentasBruto = Cuentacontable::
-                    join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
+                join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
                     ->where('plancontable.IDModelo', $modelo['ID'])
                     ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
                 $cuentasPadre = $cuentasBruto->where('IDPadre', null);
@@ -177,6 +177,25 @@ class PlanContableController extends Controller
         }
 
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * * @return \Illuminate\Http\Response
+     */
+    public function PlanCuenta()
+    {
+        $modelo = 12;
+        $cuentasBruto = Cuentacontable::
+        join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
+            ->where('plancontable.IDModelo', $modelo)
+            ->get(['cuentacontable.*', 'plancontable.ncuenta']);
+        $cuentasPadre = $cuentasBruto->where('IDPadre', null);
+        $planCuenta = $this->to_children($cuentasPadre, $cuentasBruto);
+        //return response()->json($planCuenta, 200);
+        return $planCuenta->toArray();
+    }
+
 
     public function to_children($parents, $all)
     {
@@ -190,7 +209,8 @@ class PlanContableController extends Controller
         return $array;
     }
 
-    public function to_tree($parents, $all) {
+    public function to_tree($parents, $all)
+    {
         $array = collect();
         foreach ($parents as $parent) {
             if ($all->contains('IDPadre', $parent["data"])) {

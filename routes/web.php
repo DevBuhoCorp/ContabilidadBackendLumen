@@ -18,6 +18,22 @@ $router->get('/', function () use ($router) {
 $router->get('/key', function () {
     return str_random(32);
 });
+
+/* Usuario */
+$router->get('usuario', ['uses' => 'UsuarioController@index']);
+$router->get('usuario/{id}', ['uses' => 'UsuarioController@show']);
+$router->post('usuario', ['uses' => 'UsuarioController@store']);
+$router->put('usuario/{id}', ['uses' => 'UsuarioController@update']);
+$router->delete('usuario/{id}', ['uses' => 'UsuarioController@destroy']);
+
+/* Rol */
+$router->get('rol', ['uses' => 'RolController@index']);
+$router->get('rol/{id}', ['uses' => 'RolController@show']);
+$router->get('rol_combo', ['uses' => 'RolController@combo']);
+$router->post('rol', ['uses' => 'RolController@store']);
+$router->put('rol/{id}', ['uses' => 'RolController@update']);
+$router->delete('rol/{id}', ['uses' => 'RolController@destroy']);
+
 //Catálogo Empresa
 $router->get('empresa', ['uses' => 'EmpresaController@index']);
 $router->get('empresa/{id}', ['uses' => 'EmpresaController@show']);
@@ -92,7 +108,6 @@ $router->get('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController
 $router->post('tipocuentabancaria', ['uses' => 'TipoCuentaBancariaController@store']);
 $router->put('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@update']);
 $router->delete('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@destroy']);
-
 
 //Tipo Cuenta Bancaria
 $router->get('cuentabancaria', ['uses' => 'CuentaBancariaController@index']);

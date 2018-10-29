@@ -10,19 +10,20 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
 /**
- * Class Tipocuentabancarium
+ * Class Rol
  * 
  * @property int $ID
  * @property string $Descripcion
  * @property string $Observacion
  * @property string $Estado
  * 
- * @property \Illuminate\Database\Eloquent\Collection $cuentabancaria
+ * @property \Illuminate\Database\Eloquent\Collection $users
  *
  * @package App\Models
  */
-class Tipocuentabancarium extends Eloquent
+class Rol extends Eloquent
 {
+	protected $table = 'rol';
 	protected $primaryKey = 'ID';
 	public $timestamps = false;
 
@@ -32,8 +33,8 @@ class Tipocuentabancarium extends Eloquent
 		'Estado'
 	];
 
-	public function cuentabancaria()
+	public function users()
 	{
-		return $this->hasMany(\App\Models\Cuentabancarium::class, 'IDTipoCuenta');
+		return $this->hasMany(\App\Models\User::class, 'IDRol');
 	}
 }
