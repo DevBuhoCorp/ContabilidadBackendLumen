@@ -29,11 +29,10 @@ $router->delete('usuario/{id}', ['uses' => 'UsuarioController@destroy']);
 /* Rol */
 $router->get('rol', ['uses' => 'RolController@index']);
 $router->get('rol/{id}', ['uses' => 'RolController@show']);
-$router->get('rol/combo', ['uses' => 'RolController@combo']);
+$router->get('rol_combo', ['uses' => 'RolController@combo']);
 $router->post('rol', ['uses' => 'RolController@store']);
 $router->put('rol/{id}', ['uses' => 'RolController@update']);
 $router->delete('rol/{id}', ['uses' => 'RolController@destroy']);
-
 
 //Catálogo Empresa
 $router->get('empresa', ['uses' => 'EmpresaController@index']);
@@ -74,7 +73,6 @@ $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableControl
 $router->get('plancontable', ['uses' => 'PlanContableController@index']);
 $router->get('numerocuenta', ['uses' => 'PlanContableController@numerocuenta']);
 $router->get('app/plancontable/cuentacontable', ['uses' => 'PlanContableController@apiPlanCuenta']);
-$router->get('plancontable/test', ['uses' => 'PlanContableController@PlanCuenta']);
 $router->get('plancontable/tree', ['uses' => 'PlanContableController@treePlanCuenta']);
 $router->get('plancontable/cuentabalance', ['uses' => 'PlanContableController@Modelo_Balance_PlanCuenta']);
 
@@ -110,7 +108,6 @@ $router->get('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController
 $router->post('tipocuentabancaria', ['uses' => 'TipoCuentaBancariaController@store']);
 $router->put('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@update']);
 $router->delete('tipocuentabancaria/{id}', ['uses' => 'TipoCuentaBancariaController@destroy']);
-
 
 //Tipo Cuenta Bancaria
 $router->get('cuentabancaria', ['uses' => 'CuentaBancariaController@index']);

@@ -33,7 +33,7 @@ class ModeloPlanContableController extends Controller
     public function combo()
     {
         try {
-            $modelopc = Modeloplancontable::all();
+            $modelopc = Modeloplancontable::where('Estado', 'ACT')->get();
             return response()->json($modelopc, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
@@ -53,7 +53,7 @@ class ModeloPlanContableController extends Controller
     /**
      * Store a newly created resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
@@ -80,11 +80,11 @@ class ModeloPlanContableController extends Controller
         foreach ($cuentasP as $cP) {
             $cP["IDPadre"] = $idRef;
             $cuenta = new Cuentacontable();
-            $cuenta->fill( $cP );
+            $cuenta->fill($cP);
             $cuenta->ID = 0;
             $cuenta->save();
-            $planc = Plancontable::create([ 'IDCuenta' => $cuenta->ID, 'IDModelo' => $idMPC, 'ncuenta' => $cP['ncuenta'] ]);
-            if( array_key_exists("children", $cP) ){
+            $planc = Plancontable::create(['IDCuenta' => $cuenta->ID, 'IDModelo' => $idMPC, 'ncuenta' => $cP['ncuenta']]);
+            if (array_key_exists("children", $cP)) {
                 $this->PlantillaCuenta_save($cP["children"]->toArray(), $idMPC, $cuenta->ID);
             }
 
@@ -93,11 +93,10 @@ class ModeloPlanContableController extends Controller
     }
 
 
-
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function show($id)
@@ -114,7 +113,7 @@ class ModeloPlanContableController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
@@ -125,8 +124,8 @@ class ModeloPlanContableController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
+     * @param  \Illuminate\Http\Request $request
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function update(Request $request, $id)
@@ -150,7 +149,7 @@ class ModeloPlanContableController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
+     * @param  int $id
      * @return \Illuminate\Http\Response
      */
     public function destroy($id)
