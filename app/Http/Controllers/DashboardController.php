@@ -30,5 +30,22 @@ class DashboardController extends Controller
         return response()->json($datos);
     }
 
+    public function porcentajemes($empresa)
+    {
+        DB::statement("SET lc_time_names = 'es_EC'");
+        $fecha = Carbon::now();
+        $saldos = Transaccion::whereRaw('IDEmpresa = ? and year(Fecha) = ? and MONTH(Fecha) BETWEEN ? AND ? GROUP BY YEAR(Fecha), MONTH(Fecha) ', [$empresa, $fecha->year,$fecha->month -1,$fecha->month])->get([DB::raw("SUM(Debe) as data,MONTHNAME(Fecha) as label")]);
+        return response()->json($saldos);
+    }
+
+    public function topmovimientos($modelo)
+    {
+        $datos = Cuentacontable::join('plancontable as pc', 'pc.IDCuenta', '=', 'cuentacontable.ID')
+            ->join('detalletransaccion as d','d.IDCuenta','=','pc.ID')
+            ->whereRaw('pc.IDModelo = ? and cuentacontable.IDGrupoCuenta= 2 GROUP BY d.IDCuenta ORDER BY data desc limit 5', [$modelo])
+            ->get([DB::raw('cuentacontable.Etiqueta as label'), DB::raw('count(d.IDCuenta) AS data')]);
+        return response()->json($datos);
+    }
+
     //
 }

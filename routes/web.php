@@ -151,3 +151,5 @@ $router->get('export_estadoresultado/{id}', ['uses' => 'ExportController@exporte
 //Dashboard
 $router->get('transpormes/{empresa}', ['uses' => 'DashboardController@transpormes']);
 $router->get('topcuentas/{modelo}', ['uses' => 'DashboardController@topcuentas']);
+$router->get('porcentaje/{empresa}', ['uses' => 'DashboardController@porcentajemes']);
+$router->get('movimiento/{modelo}', ['uses' => 'DashboardController@topmovimientos']);

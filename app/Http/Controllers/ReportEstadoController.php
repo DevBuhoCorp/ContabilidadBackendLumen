@@ -108,6 +108,7 @@ class ReportEstadoController extends Controller
             ->where('modeloplancontable.ID', $modplanc)
             ->where('cuentacontable.IDTipoEstado', 1)
             ->where('cuentacontable.Saldo', '!=', 0)
+            ->where('cuentacontable.IDGrupoCuenta', '=', 2)
             ->groupBy('cuentacontable.ID')
             ->orderBy('cuentacontable.NumeroCuenta')
             ->get(['cuentacontable.ID', 'cuentacontable.Saldo',DB::raw("CONCAT(cuentacontable.NumeroCuenta,' ', cuentacontable.Etiqueta) Etiqueta"),  DB::raw("IF(cuentacontable.Saldo > 0, cuentacontable.Saldo, 0) Deudor"),DB::raw("IF(cuentacontable.Saldo < 0, ABS(cuentacontable.Saldo), 0) Acreedor")]);
@@ -121,7 +122,7 @@ class ReportEstadoController extends Controller
         ->where('plancontable.IDModelo',$modplanc)
         ->where('cuentacontable.NumeroCuenta','3.4')->get(['cuentacontable.Saldo'])[0];
 
-        //return $ajuste;
+        
 
         $suman = [
             ["Etiqueta" => "Balance de Comprobación", "Debe" => $comprobacion->sum('Deudor'), "Haber" => $comprobacion->sum('Acreedor')],
