@@ -49,6 +49,22 @@ class ModeloPlanContableController extends Controller
     {
         return null;
     }
+    /**
+     * Show the form for creating a new resource.
+     * @param  int $id
+     * @return \Illuminate\Http\Response
+     */
+    public function habilitar($id)
+    {
+        try {
+            $parametro = Parametro::where('Abr', 'PCH')->first();
+            $parametro->Valor = $id;
+            $parametro->save();
+            return response()->json( [ "msg" => "Ok"], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+    }
 
     /**
      * Store a newly created resource in storage.
