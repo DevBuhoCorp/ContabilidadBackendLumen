@@ -135,9 +135,9 @@ $router->get('combobalance', ['uses' => 'TipoBalanceController@combo']);
 $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
 
 /* Reportes */
-$router->get('report_estadoresultado/{modplancontable}', [ 'uses' => 'ReportEstadoController@estado_resultado' ]);
-$router->get('report_balancefinal', [ 'uses' => 'ReportEstadoController@balancefinal' ]);
-$router->get('hojabalance/{modplanc}', [ 'uses' => 'ReportEstadoController@hojabalance' ]);
+$router->get('report_estadoresultado/{modplancontable}', ['uses' => 'ReportEstadoController@estado_resultado']);
+$router->get('report_balancefinal', ['uses' => 'ReportEstadoController@balancefinal']);
+$router->get('hojabalance/{modplanc}', ['uses' => 'ReportEstadoController@hojabalance']);
 
 /* Cuenta Balance */
 $router->post('cuentabalance/{modelo}/{balance}', ['uses' => 'TipoBalanceController@store']);
@@ -148,3 +148,7 @@ $router->get('export_detalletrans/{id}', ['uses' => 'ExportController@exportdeta
 $router->get('export_libromayor/{id}', ['uses' => 'ExportController@exportlibromayor']);
 $router->get('export_balancefinal', ['uses' => 'ExportController@exportbalancefinal']);
 $router->get('export_estadoresultado/{id}', ['uses' => 'ExportController@exportestadoresultado']);
+
+//Dashboard
+$router->get('transpormes/{empresa}', ['uses' => 'DashboardController@transpormes']);
+$router->get('topcuentas/{modelo}', ['uses' => 'DashboardController@topcuentas']);
