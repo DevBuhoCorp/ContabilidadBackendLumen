@@ -65,6 +65,7 @@ $router->get('naturaleza', ['uses' => 'NaturalezaController@index']);
 $router->get('modeloplancontable', ['uses' => 'ModeloPlanContableController@index']);
 $router->get('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@show']);
 $router->get('combomodelo', ['uses' => 'ModeloPlanContableController@combo']);
+$router->get('modeloplancontable/habilitar/{id}', ['uses' => 'ModeloPlanContableController@habilitar']);
 $router->post('modeloplancontable', ['uses' => 'ModeloPlanContableController@store']);
 $router->put('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@update']);
 $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@destroy']);
