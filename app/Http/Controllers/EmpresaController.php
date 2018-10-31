@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
+use App\Models\Usersempresa;
 use Illuminate\Http\Request;
 
 class EmpresaController extends Controller
@@ -96,6 +97,8 @@ class EmpresaController extends Controller
         }
 
     }
+
+
 
     /**
      * Show the form for editing the specified resource.

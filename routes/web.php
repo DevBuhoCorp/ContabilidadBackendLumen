@@ -22,6 +22,8 @@ $router->get('/key', function () {
 /* Usuario */
 $router->get('usuario', ['uses' => 'UsuarioController@index']);
 $router->get('usuario/{id}', ['uses' => 'UsuarioController@show']);
+$router->get('usuario/{usuario}/empresa', ['uses' => 'UsuarioController@listUsuarioEmpresa']);
+$router->post('usuario/{usuario}/empresa', ['uses' => 'UsuarioController@saveUsuarioEmpresa']);
 $router->post('usuario', ['uses' => 'UsuarioController@store']);
 $router->put('usuario/{id}', ['uses' => 'UsuarioController@update']);
 $router->delete('usuario/{id}', ['uses' => 'UsuarioController@destroy']);
