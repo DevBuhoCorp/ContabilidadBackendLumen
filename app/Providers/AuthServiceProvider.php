@@ -33,7 +33,7 @@ class AuthServiceProvider extends ServiceProvider
         // the User instance via an API token or any other method necessary.
 
         LumenPassport::routes($this->app->router);
-        LumenPassport::tokensExpireIn(Carbon::now()->addMinute(10));
+        //LumenPassport::tokensExpireIn(Carbon::now()->addMinute(10));
 
         $this->app['auth']->viaRequest('api', function ($request) {
             if ($request->input('api_token')) {

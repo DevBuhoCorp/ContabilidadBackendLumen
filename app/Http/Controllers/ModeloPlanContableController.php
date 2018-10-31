@@ -19,7 +19,7 @@ class ModeloPlanContableController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $modelopc = new Modeloplancontable();
+                $modelopc = Modeloplancontable::where('IDEmpresa', $request->input('empresa') );
                 $modelopc = $modelopc->paginate($request->input('psize'));
                 return response()->json($modelopc, 200);
             }
@@ -57,7 +57,7 @@ class ModeloPlanContableController extends Controller
     public function habilitar($id)
     {
         try {
-            $parametro = Parametro::where('Abr', 'PCH')->first();
+            $parametro = Parametroempresa::where('Abr', 'PCH')->first();
             $parametro->Valor = $id;
             $parametro->save();
             return response()->json( [ "msg" => "Ok"], 200);
@@ -149,9 +149,8 @@ class ModeloPlanContableController extends Controller
         try {
             if ($request->isJson()) {
                 $modelopc = Modeloplancontable::find($id);
-                $modelopc->modelo = $request->input('Modelo');
-                $modelopc->etiqueta = $request->input('Etiqueta');
-                $modelopc->estado = $request->input('Estado');
+                $modelopc->fill( $request->all() );
+                $modelopc->Estado = $modelopc->Estado ? 'ACT' : 'INA';
                 $modelopc->save();
                 return response()->json($modelopc, 200);
             }

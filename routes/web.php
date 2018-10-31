@@ -11,6 +11,8 @@
 |
  */
 
+use Illuminate\Http\Request;
+
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
@@ -18,6 +20,12 @@ $router->get('/', function () use ($router) {
 $router->get('/key', function () {
     return str_random(32);
 });
+
+$router->group(['middleware' => 'auth'], function () use ($router) {
+    $router->get('usuario/empresa', ['uses' => 'UsuarioController@listUsuarioEmpresaSesion']);
+});
+
+
 
 /* Usuario */
 $router->get('usuario', ['uses' => 'UsuarioController@index']);
