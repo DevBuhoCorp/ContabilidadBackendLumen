@@ -19,12 +19,8 @@ class UsuarioController extends Controller
     {
         try {
             if ($request->isJson()) {
-<<<<<<< HEAD
-                $user = Datospersonale::join('Users', 'Users.id', '=', 'IDUser')
-=======
                 $user = Datospersonale::
                 join('Users', 'Users.id', '=', 'IDUser')
->>>>>>> origin/kbsg
                     ->join('Rol', 'Rol.id', '=', 'Users.IDRol')
                     ->select('DatosPersonales.*', 'Users.email', 'Users.name', 'Users.IDRol', 'Rol.Descripcion as Rol');
                 $user = $user->paginate($request->input('psize'));
