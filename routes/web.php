@@ -23,7 +23,7 @@ $router->get('/key', function () {
 $router->get('usuario', ['uses' => 'UsuarioController@index']);
 $router->get('usuario/{id}', ['uses' => 'UsuarioController@show']);
 $router->post('usuario', ['uses' => 'UsuarioController@store']);
-$router->put('usuario/{id}', ['uses' => 'UsuarioController@update']);
+$router->put('usuario/{userid}/{datosid}', ['uses' => 'UsuarioController@update']);
 $router->delete('usuario/{id}', ['uses' => 'UsuarioController@destroy']);
 
 /* Rol */
