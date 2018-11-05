@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cuentacontable;
+use App\Models\Parametroempresa;
 use App\Models\Plancontable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -28,15 +29,14 @@ class CuentaContableController extends Controller
     {
         try {
             if ($request->isJson()) {
+
+                $parametro = Parametroempresa::where('IDEmpresa', $request->input('Empresa'))->first();
+
                 $cuentas = PlanContable::join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-                    ->where('cuentacontable.IDGrupoCuenta',2)
-                    ->where('plancontable.IDModelo', $request->input('Modelo'))
-                    
-                    //->select(DB::raw('cuentacontable.ID,cuentacontable.NumeroCuenta,cuentacontable.Etiqueta'))->get();
+                    ->where('cuentacontable.IDGrupoCuenta', 2)
+                    ->where('plancontable.IDModelo', $parametro->Valor )
                     ->select(DB::raw("plancontable.ID,CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as cuenta"))->orderBy('NumeroCuenta', 'asc')
                     ->get();;
-                    
-
 
                 /*$cuentas = $cuentas->map(function ($row) {
                     return $row['NumeroCuenta'] . ' ' . $row['Etiqueta'];

@@ -137,7 +137,7 @@ $router->get('totaltrans', ['uses' => 'TransaccionController@total']);
 $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
 
 // Balances Comprobacion
-$router->get('balance_comprobacion/{modplanc}', ['uses' => 'TransaccionController@balanceComprobacion']);
+$router->get('balance_comprobacion/{empresa}', ['uses' => 'TransaccionController@balanceComprobacion']);
 $router->get('estadoresultado/{modplanc}', ['uses' => 'TransaccionController@estadoresultado']);
 $router->get('combobalance', ['uses' => 'TipoBalanceController@combo']);
 
@@ -145,9 +145,9 @@ $router->get('combobalance', ['uses' => 'TipoBalanceController@combo']);
 $router->get('combotipoestado', ['uses' => 'TipoEstadoController@combo']);
 
 /* Reportes */
-$router->get('report_estadoresultado/{modplancontable}', ['uses' => 'ReportEstadoController@estado_resultado']);
+$router->get('report_estadoresultado/{empresa}', ['uses' => 'ReportEstadoController@estado_resultado']);
 $router->get('report_balancefinal', ['uses' => 'ReportEstadoController@balancefinal']);
-$router->get('hojabalance/{modplanc}', ['uses' => 'ReportEstadoController@hojabalance']);
+$router->get('hojabalance/{empresa}', ['uses' => 'ReportEstadoController@hojabalance']);
 
 /* Cuenta Balance */
 $router->post('cuentabalance/{modelo}/{balance}', ['uses' => 'TipoBalanceController@store']);

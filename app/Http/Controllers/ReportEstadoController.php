@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cuentacontable;
 use \App\Http\Controllers\TransaccionController;
 use App\Models\Cuentabalance;
+use App\Models\Parametroempresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -25,11 +26,13 @@ class ReportEstadoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function estado_resultado(Request $request, $modplancontable)
+    public function estado_resultado(Request $request, $empresa)
     {
+        $parametro = Parametroempresa::where('IDEmpresa', $empresa )->first();
+
         $resultado = Cuentacontable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
             ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
-            ->where('modeloplancontable.ID', $modplancontable)
+            ->where('modeloplancontable.ID', $parametro->Valor )
             ->where('cuentacontable.IDTipoEstado', 1)
             ->where('cuentacontable.IDGrupoCuenta', 2)
             ->where('cuentacontable.Saldo', '!=', 0)
@@ -53,59 +56,65 @@ class ReportEstadoController extends Controller
             ["Etiqueta" => "(=) Utlidad Neta", "valor" => $uneta]
         ];
         $utilidadesupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-            ->where('plancontable.IDModelo', $modplancontable)
+            ->where('plancontable.IDModelo', $parametro->Valor)
             ->where('cuentacontable.NumeroCuenta', '3.4')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $utilidadesupd->Saldo = $utilidades * -1;
         $utilidadesupd->save();
         $participacionupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-            ->where('plancontable.IDModelo', $modplancontable)
+            ->where('plancontable.IDModelo', $parametro->Valor)
             ->where('cuentacontable.NumeroCuenta', '2.1.2')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $participacionupd->Saldo = $participacion * -1;
         $participacionupd->save();
         $impuestoupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->where('plancontable.IDModelo', $modplancontable)
+        ->where('plancontable.IDModelo', $parametro->Valor)
         ->where('cuentacontable.NumeroCuenta', '2.1.4')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $impuestoupd->Saldo = $impuesto * -1;
         $impuestoupd->save();
         $reservaupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->where('plancontable.IDModelo', $modplancontable)
+        ->where('plancontable.IDModelo', $parametro->Valor)
         ->where('cuentacontable.NumeroCuenta', '3.2')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $reservaupd->Saldo = $reserva * -1;
         $reservaupd->save();
         $utilidadupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->where('plancontable.IDModelo', $modplancontable)
+        ->where('plancontable.IDModelo', $parametro->Valor)
         ->where('cuentacontable.NumeroCuenta', '3.3')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
         $utilidadupd->Saldo = $uneta * -1;
         $utilidadupd->save();
         return response()->json(['resultado' => $resultado, 'resultado2' => $resultado2], 201);
     }
 
-    public function balancefinal(){
+    public function balancefinal( Request $request ){
+        $parametro = Parametroempresa::where('IDEmpresa', $request->input('Empresa') )->first();
+
         $activos = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
         ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('cuentacontable.NumeroCuenta','like','1%')
+        ->where('plancontable.IDModelo', $parametro->Valor )
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
 
         $pasivos = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
         ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('cuentacontable.NumeroCuenta','like','2%')
+            ->where('plancontable.IDModelo', $parametro->Valor )
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
 
         $patrimonio = Cuentabalance::join('plancontable', 'plancontable.ID', '=', 'cuentabalance.IDPlanContable')
         ->join('cuentacontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('cuentacontable.NumeroCuenta','like','3%')
+            ->where('plancontable.IDModelo', $parametro->Valor )
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
 
         return response()->json(['activos' => $activos, 'pasivos' => $pasivos, 'patrimonio' => $patrimonio,
         'sumaactivos' => $activos->sum('Saldo'), 'sumapasivo' => $pasivos->sum('Saldo'),'sumapatrimonio' => $patrimonio->sum('Saldo')], 201);
     }
 
-    public function hojabalance($modplanc){        
-        $comprobacion = TransaccionController::balanceComprobacion($modplanc);
+    public function hojabalance($empresa){
+        $comprobacion = TransaccionController::balanceComprobacion($empresa);
+        $parametro = Parametroempresa::where('IDEmpresa', $empresa )->first();
 
         $resultado = Cuentacontable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
             ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
-            ->where('modeloplancontable.ID', $modplanc)
+            ->where('modeloplancontable.ID', $parametro->Valor )
             ->where('cuentacontable.IDTipoEstado', 1)
             ->where('cuentacontable.Saldo', '!=', 0)
             ->where('cuentacontable.IDGrupoCuenta', '=', 2)
@@ -119,7 +128,7 @@ class ReportEstadoController extends Controller
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw("IF (cuentacontable.NumeroCuenta LIKE '1%' || cuentacontable.Saldo > 0, ABS(cuentacontable.Saldo), 0) Deudor"),DB::raw("IF (cuentacontable.NumeroCuenta NOT LIKE '1%' && cuentacontable.Saldo < 0, ABS(cuentacontable.Saldo), 0) Acreedor")]);
 
         $ajuste = Cuentacontable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->where('plancontable.IDModelo',$modplanc)
+        ->where('plancontable.IDModelo', $parametro->Valor)
         ->where('cuentacontable.NumeroCuenta','3.4')->get(['cuentacontable.Saldo'])[0];
 
         
