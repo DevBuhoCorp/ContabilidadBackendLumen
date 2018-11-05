@@ -32,7 +32,7 @@ class DashboardController extends Controller
 
     public function porcentajemes($empresa)
     {
-        DB::statement("SET lc_time_names = 'es_EC'");
+        //DB::statement("SET lc_time_names = 'es_EC'");
         $fecha = Carbon::now();
         $saldos = Transaccion::whereRaw('IDEmpresa = ? and year(Fecha) = ? and MONTH(Fecha) BETWEEN ? AND ? GROUP BY YEAR(Fecha), MONTH(Fecha) ', [$empresa, $fecha->year,$fecha->month -1,$fecha->month])->get([DB::raw("SUM(Debe) as data,MONTHNAME(Fecha) as label")]);
         return response()->json($saldos);

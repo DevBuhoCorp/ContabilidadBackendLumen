@@ -43,6 +43,8 @@ class CuentaBancariaController extends Controller
     public function store(Request $request)
     {
         $CuentaBancaria = new Cuentabancarium($request->all());
+        $carbon = new Carbon($request->input("FechaApertura"));
+        $CuentaBancaria->FechaApertura = $carbon;
         $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
         $CuentaBancaria->save();
         return Response($CuentaBancaria, 200);

@@ -2,10 +2,11 @@
 
 /**
  * Created by Reliese Model.
- * Date: Mon, 29 Oct 2018 16:47:59 +0000.
+ * Date: Wed, 31 Oct 2018 22:30:22 +0000.
  */
 
 namespace App\Models;
+
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
 
@@ -16,6 +17,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * @property int $IDEmpresa
  * @property int $IDBanco
  * @property int $IDTipoCuenta
+ * @property int $IDCuentaContable
  * @property \Carbon\Carbon $FechaApertura
  * @property float $SaldoInicial
  * @property float $SaldoMinimo
@@ -27,6 +29,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * 
  * @property \App\Models\Banco $banco
  * @property \App\Models\Empresa $empresa
+ * @property \App\Models\Plancontable $plancontable
  * @property \App\Models\Tipocuentabancarium $tipocuentabancarium
  *
  * @package App\Models
@@ -40,6 +43,7 @@ class Cuentabancarium extends Eloquent
 		'IDEmpresa' => 'int',
 		'IDBanco' => 'int',
 		'IDTipoCuenta' => 'int',
+		'IDCuentaContable' => 'int',
 		'SaldoInicial' => 'float',
 		'SaldoMinimo' => 'float'
 	];
@@ -52,6 +56,7 @@ class Cuentabancarium extends Eloquent
 		'IDEmpresa',
 		'IDBanco',
 		'IDTipoCuenta',
+		'IDCuentaContable',
 		'FechaApertura',
 		'SaldoInicial',
 		'SaldoMinimo',
@@ -70,6 +75,11 @@ class Cuentabancarium extends Eloquent
 	public function empresa()
 	{
 		return $this->belongsTo(\App\Models\Empresa::class, 'IDEmpresa');
+	}
+
+	public function plancontable()
+	{
+		return $this->belongsTo(\App\Models\Plancontable::class, 'IDCuentaContable');
 	}
 
 	public function tipocuentabancarium()
