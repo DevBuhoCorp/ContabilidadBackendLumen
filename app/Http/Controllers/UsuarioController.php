@@ -52,7 +52,7 @@ class UsuarioController extends Controller
     {
         try {
             if ($request->isJson()) {
-                
+
                 //$usuario = User::create($request->all());
                 //$usuario->save();
                 $usuario = new User();
@@ -121,13 +121,33 @@ class UsuarioController extends Controller
      * @param  int $usuario
      * @return \Illuminate\Http\Response
      */
+    public function listUsuarioEmpresaSesion( Request $request )
+    {
+        try {
+            $empresas = Empresa::join('UsersEmpresa', 'IDEmpresa', '=', 'Empresa.ID')
+                ->where('UsersEmpresa.IDUsers', $request->user()->id)
+                ->where('UsersEmpresa.Estado', 'ACT')
+                ->get(['UsersEmpresa.*', 'Empresa.Descripcion']);
+            return response()->json($empresas, 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param  int $usuario
+     * @return \Illuminate\Http\Response
+     */
     public function saveUsuarioEmpresa(Request $request, $usuario)
     {
         try {
             //dd($request->all());
-            foreach ($request->all() as $row){
-                $UsersEmpresa = ( $row["ID"] == 0)? new Usersempresa() : Usersempresa::find($row["ID"]);
-                $UsersEmpresa->fill( $row );
+            foreach ($request->all() as $row) {
+                $UsersEmpresa = ($row["ID"] == 0) ? new Usersempresa() : Usersempresa::find($row["ID"]);
+                $UsersEmpresa->fill($row);
                 $UsersEmpresa->save();
             }
 

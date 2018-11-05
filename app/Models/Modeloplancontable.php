@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * Class Modeloplancontable
  * 
  * @property int $ID
+ * @property int $IDEmpresa
  * @property string $Modelo
  * @property string $Etiqueta
  * @property string $Estado
@@ -29,6 +30,7 @@ class Modeloplancontable extends Eloquent
 
 	protected $fillable = [
 		'Modelo',
+		'IDEmpresa',
 		'Etiqueta',
 		'Estado'
 	];
