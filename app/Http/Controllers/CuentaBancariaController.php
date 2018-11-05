@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cuentabancarium;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Carbon\Carbon;
 
 class CuentaBancariaController extends Controller
 {
@@ -42,10 +43,32 @@ class CuentaBancariaController extends Controller
      */
     public function store(Request $request)
     {
-        $CuentaBancaria = new Cuentabancarium($request->all());
+        
+        $CuentaBancaria = new Cuentabancarium();
+       // return 1;
+        /*$carbon = new Carbon($request->input("FechaApertura"));
+        $CuentaBancaria->FechaApertura = $carbon;*/
         $carbon = new Carbon($request->input("FechaApertura"));
-        $CuentaBancaria->FechaApertura = $carbon;
+        $fechadoc = $carbon->toDateString();
+        $CuentaBancaria->DireccionTitular = $request->input("DireccionTitular");
         $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $CuentaBancaria->FechaApertura = $fechadoc;
+        $CuentaBancaria->IDBanco = $request->input("IDBanco");
+        $CuentaBancaria->IDCuentaContable = $request->input("IDCuentaContable");
+        $CuentaBancaria->IDEmpresa = $request->input("IDEmpresa");
+        $CuentaBancaria->IDTipoCuenta = $request->input("IDTipoCuenta");
+        $CuentaBancaria->IdentificacionTitular = $request->input("IdentificacionTitular");
+        $CuentaBancaria->NombreTitular = $request->input("NombreTitular");
+        $CuentaBancaria->NumeroCuenta = $request->input("NumeroCuenta");
+        $CuentaBancaria->SaldoInicial = $request->input("SaldoInicial");
+        $CuentaBancaria->SaldoMinimo = $request->input("SaldoMinimo");
+       
+       
+       // $CuentaBancaria->fill($request->all());
+        
+        
+
+        //return($CuentaBancaria);
         $CuentaBancaria->save();
         return Response($CuentaBancaria, 200);
     }
