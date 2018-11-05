@@ -20,9 +20,10 @@ class PlanContableController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $parametro = Parametroempresa::where('IDEmpresa', $request->input('Empresa'))->first();
 
-                $planc = DB::select('SELECT fn_Sel_PlanContable(?,?) data;', [0, $parametro->Valor ]);
+//                $parametro = Parametroempresa::where('IDEmpresa', $request->input('Empresa'))->first();
+                $idModelo = ($request->input('Empresa')) ? Parametroempresa::where('IDEmpresa', $request->input('Empresa'))->first()->Valor : $request->input('Modelo');
+                $planc = DB::select('SELECT fn_Sel_PlanContable(?,?) data;', [0, $idModelo]);
                 return response()->json($planc, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);

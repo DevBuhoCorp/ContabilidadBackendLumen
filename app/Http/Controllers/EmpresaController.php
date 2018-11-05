@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Empresa;
+use App\Models\Modeloplancontable;
+use App\Models\Parametro;
+use App\Models\Parametroempresa;
 use App\Models\Usersempresa;
 use Illuminate\Http\Request;
 
@@ -70,6 +73,21 @@ class EmpresaController extends Controller
                 $empresa = Empresa::create($request->all());
                 $empresa->Estado = $empresa->Estado ? 'ACT' : 'INA';
                 $empresa->save();
+
+                $modelopc = new Modeloplancontable([ "IDEmpresa" => $empresa->ID, "Modelo" => "Modelo por Defecto", "Etiqueta" => "Modelo por Defecto", "Estado" => 'ACT'  ]);
+                $modelopc->save();
+                Parametroempresa::create([
+                    'Descripcion' => 'Plan Contable Habilitado',
+                    'IDEmpresa' => $empresa->ID,
+                    'Abr' => 'PCH',
+                    'Valor' => $modelopc->ID,
+                    'Estado' => 'ACT'
+                ]);
+
+                $idModelo = Parametro::where('Abr', 'PCP')->first()["Valor"];
+                $Plantilla = (new PlanContableController())->PlanCuenta($idModelo);
+                (new ModeloPlanContableController())->PlantillaCuenta_save($Plantilla, $modelopc->ID, null);
+
                 return response()->json($empresa, 201);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
