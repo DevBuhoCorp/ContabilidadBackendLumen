@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cuentacontable;
 use App\Models\Modeloplancontable;
-use App\Models\Parametro;
+use App\Models\Parametroempresa;
 use App\Models\Plancontable;
 use Illuminate\Http\Request;
 
@@ -30,10 +30,13 @@ class ModeloPlanContableController extends Controller
 
     }
 
-    public function combo()
+    public function combo( Request $request )
     {
         try {
-            $modelopc = Modeloplancontable::where('Estado', 'ACT')->get();
+            $modelopc = Modeloplancontable::
+                        where('Estado', 'ACT')->
+                        where('IDEmpresa', $request->input('IDEmpresa'))
+                        ->get();
             return response()->json($modelopc, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
@@ -54,10 +57,10 @@ class ModeloPlanContableController extends Controller
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function habilitar($id)
+    public function habilitar( Request $request , $id)
     {
         try {
-            $parametro = Parametroempresa::where('Abr', 'PCH')->first();
+            $parametro = Parametroempresa::where('Abr', 'PCH')->where('IDEmpresa', $request->input('Empresa'))->first();
             $parametro->Valor = $id;
             $parametro->save();
             return response()->json( [ "msg" => "Ok"], 200);

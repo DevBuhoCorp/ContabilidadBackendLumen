@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
 use App\Models\Estacion;
+use App\Models\Parametroempresa;
 use App\Models\Transaccion;
 use App\Models\Cuentacontable;
 use App\Models\Plancontable;
@@ -69,7 +70,7 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
 
-                $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', 1);
+                $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', $request->input('Empresa'));
 
                 if($request->input('FInicio')){
                     $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
@@ -215,13 +216,15 @@ class TransaccionController extends Controller
         }
     }
 
-    public static function balanceComprobacion( $modplanc){
+    public static function balanceComprobacion( $empresa ){
        // $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
-       $comprobacion = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
+        $parametro = Parametroempresa::where('IDEmpresa', $empresa )->first();
+
+        $comprobacion = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
         ->join('detalletransaccion','plancontable.ID','=','detalletransaccion.IDCuenta')
         ->join('transaccion','detalletransaccion.IDTransaccion','=','transaccion.ID')
-        ->where('modeloplancontable.ID',$modplanc)
+        ->where('modeloplancontable.ID',$parametro->Valor)
         ->where('transaccion.Estado','ACT')
         ->groupBy('cuentacontable.ID')
         ->orderBy('cuentacontable.NumeroCuenta')

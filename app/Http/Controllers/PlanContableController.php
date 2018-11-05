@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cuentabalance;
 use App\Models\Cuentacontable;
 use App\Models\Modeloplancontable;
+use App\Models\Parametroempresa;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -19,7 +20,9 @@ class PlanContableController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $planc = DB::select('SELECT fn_Sel_PlanContable(?,?) data;', [0, $request->input('id')]);
+                $parametro = Parametroempresa::where('IDEmpresa', $request->input('Empresa'))->first();
+
+                $planc = DB::select('SELECT fn_Sel_PlanContable(?,?) data;', [0, $parametro->Valor ]);
                 return response()->json($planc, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
