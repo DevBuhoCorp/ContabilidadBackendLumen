@@ -164,3 +164,6 @@ $router->get('transpormes/{empresa}', ['uses' => 'DashboardController@transporme
 $router->get('topcuentas/{modelo}', ['uses' => 'DashboardController@topcuentas']);
 $router->get('porcentaje/{empresa}', ['uses' => 'DashboardController@porcentajemes']);
 $router->get('movimiento/{modelo}', ['uses' => 'DashboardController@topmovimientos']);
+
+//Datos Personales
+$router->get('datospersonales/{iduser}', ['uses' => 'DatosPersonalesController@show']);

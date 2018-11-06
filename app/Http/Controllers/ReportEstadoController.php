@@ -104,6 +104,31 @@ class ReportEstadoController extends Controller
             ->where('plancontable.IDModelo', $parametro->Valor )
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
 
+        $activosup = Cuentacontable::join('plancontable','plancontable.IDCuenta','=','cuentacontable.ID')
+        ->where('cuentacontable.NumeroCuenta', '=', '1')
+        ->where('plancontable.IDModelo', '=', $parametro->Valor)->first(['cuentacontable.ID']);
+
+
+        
+        $actualizar = Cuentacontable::find($activosup->ID);
+
+        
+
+        $actualizar->Saldo= $activos->sum('Saldo');
+        $actualizar->save();
+
+        $pasivosup = Cuentacontable::join('plancontable as pc','pc.IDCuenta','=','cuentacontable.ID')
+        ->WhereRaw('cuentacontable.NumeroCuenta = 2 and pc.IDModelo = ?',[$parametro->Valor])->first(['cuentacontable.ID']);
+        $actualizar = Cuentacontable::find($pasivosup->ID);
+        $actualizar->Saldo= $pasivos->sum('Saldo');
+        $actualizar->save();
+
+        $patrimonioup = Cuentacontable::join('plancontable as pc','pc.IDCuenta','=','cuentacontable.ID')
+        ->WhereRaw('cuentacontable.NumeroCuenta = 3 and pc.IDModelo = ?',[$parametro->Valor])->first(['cuentacontable.ID']);
+        $actualizar = Cuentacontable::find($patrimonioup->ID);
+        $actualizar->Saldo= $patrimonio->sum('Saldo');
+        $actualizar->save();
+
         return response()->json(['activos' => $activos, 'pasivos' => $pasivos, 'patrimonio' => $patrimonio,
         'sumaactivos' => $activos->sum('Saldo'), 'sumapasivo' => $pasivos->sum('Saldo'),'sumapatrimonio' => $patrimonio->sum('Saldo')], 201);
     }

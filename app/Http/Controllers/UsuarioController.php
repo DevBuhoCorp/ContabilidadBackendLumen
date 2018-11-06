@@ -191,6 +191,7 @@ class UsuarioController extends Controller
         $datospersonales->NumConvencional = $request->input("NumConvencional");
         $datospersonales->NumMovil = $request->input("NumMovil");
         $datospersonales->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+        $datospersonales->FotoPerfil = $request->input("FotoPerfil");
         $datospersonales->save();
     }
 
