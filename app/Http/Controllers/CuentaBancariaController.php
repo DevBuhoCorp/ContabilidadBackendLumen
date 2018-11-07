@@ -106,8 +106,24 @@ class CuentaBancariaController extends Controller
     public function update(Request $request, $id)
     {
         $CuentaBancaria = Cuentabancarium::find($id);
-        $CuentaBancaria->fill($request->all());
+
+        $CuentaBancaria->DireccionTitular = $request->input("DireccionTitular");
         $CuentaBancaria->Estado = $request->input("Estado") ? 'ACT' : 'INA';
+
+        $carbon = new Carbon($request->input("FechaApertura"));
+        $fechadoc = $carbon->toDateString();
+
+        $CuentaBancaria->FechaApertura = $fechadoc;
+        $CuentaBancaria->IDBanco = $request->input("IDBanco");
+        $CuentaBancaria->IDCuentaContable = $request->input("IDCuentaContable");
+        $CuentaBancaria->IDEmpresa = $request->input("IDEmpresa");
+        $CuentaBancaria->IDTipoCuenta = $request->input("IDTipoCuenta");
+        $CuentaBancaria->IdentificacionTitular = $request->input("IdentificacionTitular");
+        $CuentaBancaria->NombreTitular = $request->input("NombreTitular");
+        $CuentaBancaria->NumeroCuenta = $request->input("NumeroCuenta");
+        $CuentaBancaria->SaldoInicial = $request->input("SaldoInicial");
+        $CuentaBancaria->SaldoMinimo = $request->input("SaldoMinimo");
+
         $CuentaBancaria->save();
         return Response($CuentaBancaria, 200);
     }
