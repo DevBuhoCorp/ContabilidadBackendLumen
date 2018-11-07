@@ -128,7 +128,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 //Transacciones
     $router->get('transaccion', ['uses' => 'TransaccionController@index']);
-    $router->post('transaccion', ['uses' => 'TransaccionController@store']);
+    $router->post('transaccion/{empresa}', ['uses' => 'TransaccionController@store']);
     $router->get('transaccion/{id}', ['uses' => 'TransaccionController@show']);
     $router->get('transporcuenta/{id}', ['uses' => 'TransaccionController@transporcuenta']);
     $router->get('totaltrans', ['uses' => 'TransaccionController@total']);
