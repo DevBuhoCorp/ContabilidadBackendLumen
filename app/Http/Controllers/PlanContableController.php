@@ -157,30 +157,7 @@ class PlanContableController extends Controller
 
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int $id
-     * @return \Illuminate\Http\Response
-     */
-    public function apiPlanCuenta()
-    {
-        try {
-            $modelos = Modeloplancontable::where('Estado', 'ACT')->get();
-            foreach ($modelos as $modelo) {
-                $cuentasBruto = Cuentacontable::
-                join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
-                    ->where('plancontable.IDModelo', $modelo['ID'])
-                    ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
-                $cuentasPadre = $cuentasBruto->where('IDPadre', null);
-                $modelo["cuentas"] = $this->to_children($cuentasPadre, $cuentasBruto);
-            }
-            return response()->json($modelos, 200);
-        } catch (ModelNotFoundException $e) {
-            return response()->json(['error' => $e], 500);
-        }
 
-    }
 
     /**
      * Remove the specified resource from storage.

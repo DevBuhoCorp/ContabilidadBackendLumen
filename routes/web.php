@@ -81,7 +81,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 //PlanContable
     $router->get('plancontable', ['uses' => 'PlanContableController@index']);
     $router->get('numerocuenta', ['uses' => 'PlanContableController@numerocuenta']);
-    $router->get('app/plancontable/cuentacontable', ['uses' => 'PlanContableController@apiPlanCuenta']);
+//    $router->get('app/plancontable/cuentacontable', ['uses' => 'PlanContableController@apiPlanCuenta']);
     $router->get('plancontable/tree', ['uses' => 'PlanContableController@treePlanCuenta']);
     $router->get('plancontable/cuentabalance', ['uses' => 'PlanContableController@Modelo_Balance_PlanCuenta']);
 
@@ -168,6 +168,18 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 
 });
+$router->group(['middleware' => 'app'], function () use ($router) {
 
+    $router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
+    $router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
+    $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
+});
 
+Route::get('app/proteccion', ['middleware' => 'app', function ( Request $request ) {
+//    return "eres mayor de edad y puedes ver este contenido";
+    return $request->estacion;
+}]);
 
+//$router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
+//$router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
+//$router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
