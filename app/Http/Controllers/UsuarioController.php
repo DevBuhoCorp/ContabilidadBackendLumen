@@ -19,8 +19,7 @@ class UsuarioController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $user = Datospersonale::
-                join('Users', 'Users.id', '=', 'IDUser')
+                $user = Datospersonale::join('Users', 'Users.id', '=', 'IDUser')
                     ->join('Rol', 'Rol.id', '=', 'Users.IDRol')
                     ->select('DatosPersonales.*', 'Users.email', 'Users.name', 'Users.IDRol', 'Rol.Descripcion as Rol');
                 $user = $user->paginate($request->input('psize'));
@@ -58,7 +57,7 @@ class UsuarioController extends Controller
                 $usuario = new User();
                 $usuario->name = $request->input("name");
                 $usuario->email = $request->input("email");
-                $usuario->password = password_hash($request->input("password"), PASSWORD_BCRYPT);
+                $usuario->password = password_hash($request->input("Cedula"), PASSWORD_BCRYPT);
                 $usuario->IDRol = $request->input("IDRol");
                 $usuario->save();
                 $datospersonales = new Datospersonale();
@@ -121,7 +120,7 @@ class UsuarioController extends Controller
      * @param  int $usuario
      * @return \Illuminate\Http\Response
      */
-    public function listUsuarioEmpresaSesion( Request $request )
+    public function listUsuarioEmpresaSesion(Request $request)
     {
         try {
             $empresas = Empresa::join('UsersEmpresa', 'IDEmpresa', '=', 'Empresa.ID')
@@ -210,6 +209,18 @@ class UsuarioController extends Controller
             return Response($datospersonales, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
+        }
+    }
+
+    public function changepass(Request $request, $userid)
+    {
+        $usuario = User::find($userid);
+        if (password_verify($request->input('OldPass'),$usuario->password)) {
+            $usuario->password = password_hash($request->input('NewPass'), PASSWORD_BCRYPT);
+            $usuario->save();
+            return response()->json(true, 200);
+        } else {
+            return response()->json(false, 200);
         }
     }
 }

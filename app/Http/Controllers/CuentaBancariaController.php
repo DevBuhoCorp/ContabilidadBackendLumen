@@ -6,6 +6,7 @@ use App\Models\Cuentabancarium;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class CuentaBancariaController extends Controller
 {
@@ -19,8 +20,10 @@ class CuentaBancariaController extends Controller
         $CuentaBancaria = Cuentabancarium::
                         join('Banco','Banco.ID','=' ,'IDBanco')
                         ->join('TipoCuentaBancaria','TipoCuentaBancaria.ID','=' ,'IDTipoCuenta')
+                        ->join('plancontable','cuentabancaria.IDCuentaContable','=' ,'plancontable.ID')
+                        ->join('cuentacontable','plancontable.IDCuenta','=' ,'cuentacontable.ID')
                         ->where('IDEmpresa', $request->input('empresa') )
-                        ->select('CuentaBancaria.*','Banco.Descripcion as Banco', 'TipoCuentaBancaria.Descripcion as TipoCuenta')
+                        ->select('CuentaBancaria.*','Banco.Descripcion as Banco', 'TipoCuentaBancaria.Descripcion as TipoCuenta', DB::raw("CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) as Cuenta"))
                         ->paginate($request->input('psize'));
         return Response($CuentaBancaria, 200);
     }

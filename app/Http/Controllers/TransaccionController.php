@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\DB;
 
 class TransaccionController extends Controller
 {
-    public function store(Request $request)
+    public function store(Request $request, $empresa)
     {
         try {
             if ($request->isJson()) {
@@ -27,7 +27,7 @@ class TransaccionController extends Controller
                 $transaccion = new Transaccion();
                 $transaccion->Fecha = $actual;
                 // Modificar
-                $transaccion->IDEmpresa = 2;
+                $transaccion->IDEmpresa = $empresa;
                 $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
                 $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
                 $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
