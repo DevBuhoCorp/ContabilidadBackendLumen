@@ -13,6 +13,10 @@
 
 use Illuminate\Http\Request;
 
+$router->get('app/conexion', function () use ($router) {
+    return 1;
+});
+
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
