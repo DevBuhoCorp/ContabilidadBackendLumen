@@ -29,6 +29,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('usuario', ['uses' => 'UsuarioController@index']);
     $router->get('usuario/{id}', ['uses' => 'UsuarioController@show']);
     $router->get('usuario/{usuario}/empresa', ['uses' => 'UsuarioController@listUsuarioEmpresa']);
+    $router->put('changepass/{userid}', ['uses' => 'UsuarioController@changepass']);
     $router->post('usuario/{usuario}/empresa', ['uses' => 'UsuarioController@saveUsuarioEmpresa']);
     $router->post('usuario', ['uses' => 'UsuarioController@store']);
     $router->put('usuario/{userid}/{datosid}', ['uses' => 'UsuarioController@update']);
