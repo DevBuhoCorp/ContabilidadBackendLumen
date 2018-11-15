@@ -82,7 +82,7 @@ class ModeloPlanContableController extends Controller
                 $modelopc = Modeloplancontable::create($request->all());
                 $modelopc->Estado = $modelopc->Estado ? 'ACT' : 'INA';
                 $modelopc->save();
-                $idModelo = Parametro::where('Abr', 'PCP')->first()["Valor"];
+                $idModelo = Parametroempresa::where('Abr', 'PCP')->first()["Valor"];
                 $Plantilla = (new PlanContableController())->PlanCuenta($idModelo);
                 $this->PlantillaCuenta_save($Plantilla, $modelopc->ID, null);
 

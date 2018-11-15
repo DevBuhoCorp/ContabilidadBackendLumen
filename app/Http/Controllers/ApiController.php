@@ -7,6 +7,7 @@ use App\Models\Empresa;
 use App\Models\Modeloplancontable;
 use App\Models\Parametroempresa;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ApiController extends Controller
 {
@@ -18,8 +19,8 @@ class ApiController extends Controller
     public function apiEmpresa(  )
     {
         try {
-                $empresa = Empresa::where('Estado', 'ACT')->get();
-            return response()->json($empresa, 200);
+                $empresa = Empresa::where('Estado', 'ACT')->get([ 'ID', 'RazonSocial AS Nombre' ]);
+                return response()->json($empresa, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
         }
@@ -36,7 +37,8 @@ class ApiController extends Controller
     public function apiPlanCuenta( $Empresa )
     {
         try {
-            $modelos = Modeloplancontable::where('Estado', 'ACT')->where('IDEmpresa', $Empresa)->get();
+            $Parametroempresa = Parametroempresa::where('IDEmpresa', $Empresa)->where('Abr', 'PCH')->first();
+            $modelos = Modeloplancontable::where('Estado', 'ACT')->where('IDEmpresa', $Empresa)->get(['Modeloplancontable.*', DB::raw( 'ID = '. $Parametroempresa->Valor. ' as Habilitado ') ]);
             foreach ($modelos as $modelo) {
                 $cuentasBruto = Cuentacontable::
                 join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')

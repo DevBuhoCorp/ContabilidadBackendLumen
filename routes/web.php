@@ -14,7 +14,8 @@
 use Illuminate\Http\Request;
 
 $router->get('app/conexion', function () use ($router) {
-    return 1;
+    return password_hash('admin', PASSWORD_BCRYPT);
+//    return 1;
 });
 
 $router->get('/', function () use ($router) {
@@ -177,8 +178,11 @@ $router->group(['middleware' => 'app'], function () use ($router) {
 
     $router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
     $router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
-    $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
+    
 });
+
+$router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
+
 
 Route::get('app/proteccion', ['middleware' => 'app', function ( Request $request ) {
 //    return "eres mayor de edad y puedes ver este contenido";
