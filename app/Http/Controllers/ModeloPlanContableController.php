@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Cuentacontable;
 use App\Models\Modeloplancontable;
+use App\Models\Parametro;
 use App\Models\Parametroempresa;
 use App\Models\Plancontable;
 use Illuminate\Http\Request;
@@ -82,7 +83,7 @@ class ModeloPlanContableController extends Controller
                 $modelopc = Modeloplancontable::create($request->all());
                 $modelopc->Estado = $modelopc->Estado ? 'ACT' : 'INA';
                 $modelopc->save();
-                $idModelo = Parametroempresa::where('Abr', 'PCP')->first()["Valor"];
+                $idModelo = Parametro::where('Abr', 'PCP')->first()["Valor"];
                 $Plantilla = (new PlanContableController())->PlanCuenta($idModelo);
                 $this->PlantillaCuenta_save($Plantilla, $modelopc->ID, null);
 

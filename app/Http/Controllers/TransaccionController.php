@@ -15,6 +15,78 @@ use Illuminate\Support\Facades\DB;
 
 class TransaccionController extends Controller
 {
+
+    public function store_app(Request $request, $empresa)
+    {
+        try {
+            if ($request->isJson()) {
+
+                $transaccion = new Transaccion();
+                $transaccion->IDEstacion = $request["estacion"]->ID;
+                $transaccion->IDEmpresa = $empresa;
+                $transaccion->fill( $request->all() );
+                $transaccion->Estado =
+                $transaccion->save();
+
+
+                $detalles = $request->all()['Detalle'];
+
+                // Modificar
+                $documento = new Documentocontable();
+                $documento->Fecha = $transaccion->Fecha;
+                $documento->SerieDocumento = $request->all()['SerieDocumento'];
+                $documento->IDTransaccion = $transaccion->ID;
+                $documento->save();
+
+                foreach ($request->all()['Detalle'] as $detalle ){
+                    $detalle = new Detalletransaccion( $detalle );
+                    $detalle->IDTransaccion = $transaccion->ID;
+                    $detalle->save();
+
+                    $cuentacontable = Cuentacontable::join('plancontable','IDCuenta','Cuentacontable.ID')->where('plancontable.ID', $detalle->IDCuenta)->first();
+                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalle->Debe - $detalle->Haber );
+                    $cuentacontable->save();
+
+                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                    do {
+                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalle->Debe - $detalle->Haber );
+                        $cuentacontablepadre->save();
+                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+                    } while ($cuentacontablepadre);
+
+
+                }
+                return response()->json($transaccion->ID, 201);
+
+//                for ($i = 0; $i < count($detalles); $i++) {
+//                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+//                    $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
+//                    $cuentacontable = Cuentacontable::find($planc->IDCuenta);
+//                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+//                    $cuentacontable->save();
+//                    /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+//                    $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
+//                    $cuentacontablepadre->save();*/
+//                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+//                    do {
+//                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+//                        $cuentacontablepadre->save();
+//                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+//                    } while ($cuentacontablepadre);
+//                }
+//                $detalles = Detalletransaccion::insert($detalles);
+
+
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+
+
     public function store(Request $request, $empresa)
     {
         try {
@@ -55,7 +127,7 @@ class TransaccionController extends Controller
                     } while ($cuentacontablepadre);
                 }
                 $detalles = Detalletransaccion::insert($detalles);
-                return response()->json($detalles, 201);
+                return response()->json($transaccion->ID, 201);
 
             }
             return response()->json(['error' => 'Unauthorized'], 401);

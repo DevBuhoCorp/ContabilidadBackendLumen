@@ -14,8 +14,8 @@
 use Illuminate\Http\Request;
 
 $router->get('app/conexion', function () use ($router) {
-    return password_hash('admin', PASSWORD_BCRYPT);
-//    return 1;
+//    return password_hash('admin', PASSWORD_BCRYPT);
+    return 1;
 });
 
 $router->get('/', function () use ($router) {
@@ -178,10 +178,26 @@ $router->group(['middleware' => 'app'], function () use ($router) {
 
     $router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
     $router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
-    
+    $router->get('app/mplancontable/{Empresa}', ['uses' => 'ApiController@apiModeloPlanCuenta']);
+    $router->get('app/cuentacontable/{id}', ['uses' => 'ApiController@apiCuentaContable']);
+
+//    Ingresar Transaccion
+    $router->post('app/transaccion/{empresa}', ['uses' => 'TransaccionController@store_app']);
+
+    $router->post('app/test', function( Request $request ){
+//        return response()->json( $request->all() , 201);
+        return response()->json( 1, 201);
+    });
+
+
+
+
 });
 
 $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
+
+
+$router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
 
 
 Route::get('app/proteccion', ['middleware' => 'app', function ( Request $request ) {

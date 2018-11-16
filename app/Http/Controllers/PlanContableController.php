@@ -157,19 +157,16 @@ class PlanContableController extends Controller
 
     }
 
-
-
     /**
      * Remove the specified resource from storage.
      *
      * * @return \Illuminate\Http\Response
      */
-    public function PlanCuenta()
+    public function PlanCuenta( $idModelo )
     {
-        $modelo = 12;
         $cuentasBruto = Cuentacontable::
-        join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
-            ->where('plancontable.IDModelo', $modelo)
+            join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
+            ->where('plancontable.IDModelo', $idModelo)
             ->get(['cuentacontable.*', 'plancontable.ncuenta']);
         $cuentasPadre = $cuentasBruto->where('IDPadre', null);
         $planCuenta = $this->to_children($cuentasPadre, $cuentasBruto);
