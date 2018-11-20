@@ -112,6 +112,7 @@ class TransaccionController extends Controller
                 $documento->save();
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+                    $detalles[$i]["IDUser"] = $request->user()->ID;
                     $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
                     $cuentacontable = Cuentacontable::find($planc->IDCuenta);
                     $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);

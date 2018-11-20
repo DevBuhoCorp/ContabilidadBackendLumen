@@ -84,7 +84,7 @@ class ApiController extends Controller
         try {
 
             $cuentasBruto = Cuentacontable::
-            join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
+                join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
                 ->where('plancontable.IDModelo', $id)
                 ->get(['plancontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado']);
 //                            ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
