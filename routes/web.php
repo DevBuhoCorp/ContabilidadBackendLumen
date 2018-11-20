@@ -100,6 +100,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('dragcuentacontable', ['uses' => 'CuentaContableController@drag']);
     $router->get('cuentapadre', ['uses' => 'CuentaContableController@MaxPadre']);
     $router->get('plancontable/{pc}/cuentacontable/{id}', ['uses' => 'CuentaContableController@getNumCuenta']);
+    $router->get('cuentacontable/{id}', ['uses' => 'ApiController@apiCuentaContable']);
 
 //Estacion
     $router->get('estacion', ['uses' => 'EstacionController@index']);
@@ -174,6 +175,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 
 });
+
 $router->group(['middleware' => 'app'], function () use ($router) {
 
     $router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
@@ -181,29 +183,18 @@ $router->group(['middleware' => 'app'], function () use ($router) {
     $router->get('app/mplancontable/{Empresa}', ['uses' => 'ApiController@apiModeloPlanCuenta']);
     $router->get('app/cuentacontable/{id}', ['uses' => 'ApiController@apiCuentaContable']);
 
-//    Ingresar Transaccion
+    //    Ingresar Transaccion
     $router->post('app/transaccion/{empresa}', ['uses' => 'TransaccionController@store_app']);
 
     $router->post('app/test', function( Request $request ){
-//        return response()->json( $request->all() , 201);
         return response()->json( 1, 201);
     });
-
-
-
 
 });
 
 $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
 
-
 $router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
-
-
-Route::get('app/proteccion', ['middleware' => 'app', function ( Request $request ) {
-//    return "eres mayor de edad y puedes ver este contenido";
-    return $request->estacion;
-}]);
 
 //$router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
 //$router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);

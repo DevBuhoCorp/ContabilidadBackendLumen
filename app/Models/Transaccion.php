@@ -36,6 +36,7 @@ class Transaccion extends Eloquent
 	protected $casts = [
 		'IDEstacion' => 'int',
 		'IDEmpresa' => 'int',
+		'IDUser' => 'int',
 		'Debe' => 'float',
 		'Haber' => 'float'
 	];
@@ -48,6 +49,7 @@ class Transaccion extends Eloquent
 		'Fecha',
 		'IDEstacion',
 		'IDEmpresa',
+		'IDUser',
 		'Etiqueta',
 		'Debe',
 		'Haber',
