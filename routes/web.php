@@ -11,7 +11,11 @@
 |
  */
 
+use App\Exports\CuentacontableExport;
+use App\Exports\UsersExport;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
+
 
 $router->get('app/conexion', function () use ($router) {
 //    return password_hash('admin', PASSWORD_BCRYPT);
@@ -83,6 +87,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->post('modeloplancontable', ['uses' => 'ModeloPlanContableController@store']);
     $router->put('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@update']);
     $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@destroy']);
+
+    $router->get('modeloplancontable/export/{id}', function ( $id ) {
+        return ( new CuentacontableExport($id) )->download( 'CuentaContables.xlsx' );
+    });
+
+
 
 //PlanContable
     $router->get('plancontable', ['uses' => 'PlanContableController@index']);
@@ -186,8 +196,8 @@ $router->group(['middleware' => 'app'], function () use ($router) {
     //    Ingresar Transaccion
     $router->post('app/transaccion/{empresa}', ['uses' => 'TransaccionController@store_app']);
 
-    $router->post('app/test', function( Request $request ){
-        return response()->json( 1, 201);
+    $router->post('app/test', function (Request $request) {
+        return response()->json(1, 201);
     });
 
 });
@@ -195,6 +205,8 @@ $router->group(['middleware' => 'app'], function () use ($router) {
 $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
 
 $router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
+
+
 
 //$router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
 //$router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
