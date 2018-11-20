@@ -309,9 +309,5 @@ class TransaccionController extends Controller
         return $comprobacion;
     }
 
-    public function estadoresultado(Request $request, $modplanc){
-        $rows = DB::select('CALL estadoresultado(?)', [ $modplanc ]);
-        return Response($rows,200);
-    }
-
+  
 }
