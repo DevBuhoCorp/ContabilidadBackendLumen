@@ -33,7 +33,8 @@ class CuentacontableExport implements FromQuery, WithHeadings, WithEvents, WithM
     {
         return [
             $cuenta->NumeroCuenta,
-            ( str_repeat('        ', substr_count($cuenta->NumeroCuenta, '.') )   ) . $cuenta->Etiqueta
+            ( str_repeat('        ', substr_count($cuenta->NumeroCuenta, '.') )   ) . $cuenta->Etiqueta,
+            $cuenta->Saldo
         ];
     }
 
@@ -42,6 +43,7 @@ class CuentacontableExport implements FromQuery, WithHeadings, WithEvents, WithM
         return [
             'Número de Cuenta',
             'Etiqueta',
+            'Saldo',
         ];
     }
 
@@ -51,7 +53,8 @@ class CuentacontableExport implements FromQuery, WithHeadings, WithEvents, WithM
     public function columnFormats(): array
     {
         return [
-            'A' => NumberFormat::FORMAT_TEXT
+            'A' => NumberFormat::FORMAT_TEXT,
+            'C' => NumberFormat::FORMAT_CURRENCY_USD_SIMPLE,
         ];
     }
 
@@ -66,7 +69,7 @@ class CuentacontableExport implements FromQuery, WithHeadings, WithEvents, WithM
 
                 $event->sheet->getDelegate()->setTitle('Cuentas Contables');
 
-                $event->sheet->getDelegate()->getStyle('A1:B1')->applyFromArray([
+                $event->sheet->getDelegate()->getStyle('A1:C1')->applyFromArray([
                     'font' => [
                         'size' => 18,
                         'bold' => true,

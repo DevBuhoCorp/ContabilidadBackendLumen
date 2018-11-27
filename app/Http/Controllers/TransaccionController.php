@@ -20,43 +20,55 @@ class TransaccionController extends Controller
     {
         try {
             if ($request->isJson()) {
+                $results = array();
+                $transs = $request->all();
 
-                $transaccion = new Transaccion();
-                $transaccion->IDEstacion = $request["estacion"]->ID;
-                $transaccion->IDEmpresa = $empresa;
-                $transaccion->fill( $request->all() );
-                $transaccion->Estado =
-                $transaccion->save();
+                foreach ( $transs as $trans){
+                    $transaccion = new Transaccion();
+                    $transaccion->IDEstacion = $request->header('estacion')->ID;
+                    $transaccion->IDEmpresa = $empresa;
+                    $transaccion->fill( $trans );
+                    $transaccion->save();
+//                    return response()->json($transaccion,201);
+
+                    $detalles = $trans['Detalle'];
+
+                    // Modificar
+                    $documento = new Documentocontable();
+                    $documento->Fecha = $transaccion->Fecha;
+                    $documento->SerieDocumento = $trans['SerieDocumento'];
+                    $documento->IDTransaccion = $transaccion->ID;
+                    $documento->save();
+
+                    foreach ($detalles as $detalle ){
+                        $detalle = new Detalletransaccion( $detalle );
+                        $detalle->IDTransaccion = $transaccion->ID;
+                        $detalle->save();
+
+                        $cuentacontable = Cuentacontable::join('plancontable','IDCuenta','Cuentacontable.ID')->where('plancontable.ID', $detalle->IDCuenta)->first();
+                        $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalle->Debe - $detalle->Haber );
+                        $cuentacontable->save();
+
+                        $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                        do {
+                            $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalle->Debe - $detalle->Haber );
+                            $cuentacontablepadre->save();
+                            $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+                        } while ($cuentacontablepadre);
 
 
-                $detalles = $request->all()['Detalle'];
+                    }
 
-                // Modificar
-                $documento = new Documentocontable();
-                $documento->Fecha = $transaccion->Fecha;
-                $documento->SerieDocumento = $request->all()['SerieDocumento'];
-                $documento->IDTransaccion = $transaccion->ID;
-                $documento->save();
 
-                foreach ($request->all()['Detalle'] as $detalle ){
-                    $detalle = new Detalletransaccion( $detalle );
-                    $detalle->IDTransaccion = $transaccion->ID;
-                    $detalle->save();
-
-                    $cuentacontable = Cuentacontable::join('plancontable','IDCuenta','Cuentacontable.ID')->where('plancontable.ID', $detalle->IDCuenta)->first();
-                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalle->Debe - $detalle->Haber );
-                    $cuentacontable->save();
-
-                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                    do {
-                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalle->Debe - $detalle->Haber );
-                        $cuentacontablepadre->save();
-                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
-                    } while ($cuentacontablepadre);
+                    array_push( $results, [
+                        "IDTC" => $transaccion->ID,
+                        "IDREF" => $trans["IDREF"],
+                    ] );
 
 
                 }
-                return response()->json($transaccion->ID, 201);
+
+                return response()->json($results, 201);
 
 //                for ($i = 0; $i < count($detalles); $i++) {
 //                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
@@ -100,6 +112,7 @@ class TransaccionController extends Controller
                 $transaccion->Fecha = $actual;
                 // Modificar
                 $transaccion->IDEmpresa = $empresa;
+                $transaccion->IDUser = $request->user()->ID;
                 $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
                 $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
                 $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
@@ -112,7 +125,7 @@ class TransaccionController extends Controller
                 $documento->save();
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
-                    $detalles[$i]["IDUser"] = $request->user()->ID;
+
                     $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
                     $cuentacontable = Cuentacontable::find($planc->IDCuenta);
                     $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
