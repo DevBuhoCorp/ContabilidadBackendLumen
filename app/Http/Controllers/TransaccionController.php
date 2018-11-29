@@ -20,73 +20,52 @@ class TransaccionController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $results = array();
+                $results = [
+                    "IDREF" => 0
+                ];
                 $transs = $request->all();
 
-                foreach ( $transs as $trans){
-                    $transaccion = new Transaccion();
-                    $transaccion->IDEstacion = $request->header('estacion')->ID;
-                    $transaccion->IDEmpresa = $empresa;
-                    $transaccion->fill( $trans );
-                    $transaccion->save();
-//                    return response()->json($transaccion,201);
+                DB::beginTransaction();
+                try {
+                    foreach ($transs as $trans) {
 
-                    $detalles = $trans['Detalle'];
+                        $transaccion = new Transaccion();
+                        $transaccion->IDEstacion = $request->header('estacion')->ID;
+                        $transaccion->IDEmpresa = $empresa;
+                        $transaccion->fill($trans);
+                        $transaccion->save();
 
-                    // Modificar
-                    $documento = new Documentocontable();
-                    $documento->Fecha = $transaccion->Fecha;
-                    $documento->SerieDocumento = $trans['SerieDocumento'];
-                    $documento->IDTransaccion = $transaccion->ID;
-                    $documento->save();
+                        $detalles = $trans['Detalle'];
 
-                    foreach ($detalles as $detalle ){
-                        $detalle = new Detalletransaccion( $detalle );
-                        $detalle->IDTransaccion = $transaccion->ID;
-                        $detalle->save();
+                        // Modificar
+                        $documento = new Documentocontable();
+                        $documento->Fecha = $transaccion->Fecha;
+                        $documento->SerieDocumento = $trans['SerieDocumento'];
+                        $documento->IDTransaccion = $transaccion->ID;
+                        $documento->save();
 
-                        $cuentacontable = Cuentacontable::join('plancontable','IDCuenta','Cuentacontable.ID')->where('plancontable.ID', $detalle->IDCuenta)->first();
-                        $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalle->Debe - $detalle->Haber );
-                        $cuentacontable->save();
+                        $transaccion->detalletransaccions()->createMany($detalles);
 
-                        $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                        do {
-                            $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalle->Debe - $detalle->Haber );
-                            $cuentacontablepadre->save();
-                            $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
-                        } while ($cuentacontablepadre);
-
+                        foreach ($detalles as $detalle) {
+                            $cuentacontable = Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')->where('plancontable.ID', $detalle["IDCuenta"])->first();
+                            $cuentacontable->update(["Saldo" => $cuentacontable["Saldo"] + ($detalle["Debe"] - $detalle["Haber"])]);
+                        }
+                        $results["IDREF"] = $trans["IDREF"];
 
                     }
-
-
-                    array_push( $results, [
-                        "IDTC" => $transaccion->ID,
-                        "IDREF" => $trans["IDREF"],
-                    ] );
-
-
+                    DB::commit();
+                    $results["EstadoTransaccion"] = "CORRECTO";
+                    return response()->json($results, 201);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    $results["EstadoTransaccion"] = "ERROR";
+                    return response()->json($results, 201);
                 }
 
-                return response()->json($results, 201);
 
-//                for ($i = 0; $i < count($detalles); $i++) {
-//                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
-//                    $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
-//                    $cuentacontable = Cuentacontable::find($planc->IDCuenta);
-//                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-//                    $cuentacontable->save();
-//                    /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-//                    $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
-//                    $cuentacontablepadre->save();*/
-//                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-//                    do {
-//                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-//                        $cuentacontablepadre->save();
-//                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
-//                    } while ($cuentacontablepadre);
-//                }
-//                $detalles = Detalletransaccion::insert($detalles);
+
+
+
 
 
             }
@@ -96,7 +75,6 @@ class TransaccionController extends Controller
         }
 
     }
-
 
 
     public function store(Request $request, $empresa)
@@ -158,11 +136,11 @@ class TransaccionController extends Controller
 
                 $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', $request->input('Empresa'));
 
-                if($request->input('FInicio')){
+                if ($request->input('FInicio')) {
                     $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
-                    $FFin = ($request->input('FFin'))?  Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
-                    $query->whereBetween(DB::raw('date(Fecha)'),[ $FInicio , $FFin ]);
-                }elseif ($request->input('FFin')){
+                    $FFin = ($request->input('FFin')) ? Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
+                    $query->whereBetween(DB::raw('date(Fecha)'), [$FInicio, $FFin]);
+                } elseif ($request->input('FFin')) {
                     $FFin = Carbon::parse($request->input('FFin'))->toDateString();
                     $query->where(DB::raw('date(Fecha)'), '<=', $FFin);
                 }
@@ -171,7 +149,7 @@ class TransaccionController extends Controller
                     switch ($request->input('ttransaccion')) {
                         case "app":
                             if ($request->input('app')) {
-                                $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get([ 'ID' ]);
+                                $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get(['ID']);
                                 $query = $query->whereIn('IDEstacion', $idsEstacion);
                             } else {
                                 $query = $query->WhereNotNull('IDEstacion');
@@ -182,10 +160,10 @@ class TransaccionController extends Controller
                             break;
                     }
                 }
-                $totales = [ "Debe" => $query->sum('Debe'), "Haber" => $query->sum('Haber')];
+                $totales = ["Debe" => $query->sum('Debe'), "Haber" => $query->sum('Haber')];
                 $transacciones = $query->paginate($request->input('psize'));
 
-                return response()->json([ "data" => $transacciones, "totales" => $totales ], 200);
+                return response()->json(["data" => $transacciones, "totales" => $totales], 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
@@ -220,20 +198,20 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
                 $totales = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
-                ->where('pc.IDCuenta', $id)->get();                
+                    ->where('pc.IDCuenta', $id)->get();
 
                 $query = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
-                    ->join('cuentacontable as cc','pc.IDCuenta','=','cc.ID')
-                    ->join('transaccion as t','detalletransaccion.IDTransaccion','=','t.ID')
+                    ->join('cuentacontable as cc', 'pc.IDCuenta', '=', 'cc.ID')
+                    ->join('transaccion as t', 'detalletransaccion.IDTransaccion', '=', 't.ID')
                     ->where('pc.IDCuenta', $id)
                     ->select(DB::raw("detalletransaccion.Debe,detalletransaccion.Haber,t.Etiqueta as Transaccion, t.Fecha"));
 
 
-                if($request->input('FInicio')){
+                if ($request->input('FInicio')) {
                     $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
-                    $FFin = ($request->input('FFin'))?  Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
-                    $query->whereBetween(DB::raw('date(t.Fecha)'),[ $FInicio , $FFin ]);
-                }elseif ($request->input('FFin')){
+                    $FFin = ($request->input('FFin')) ? Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
+                    $query->whereBetween(DB::raw('date(t.Fecha)'), [$FInicio, $FFin]);
+                } elseif ($request->input('FFin')) {
                     $FFin = Carbon::parse($request->input('FFin'))->toDateString();
                     $query->where(DB::raw('date(t.Fecha)'), '<=', $FFin);
                 }
@@ -242,7 +220,7 @@ class TransaccionController extends Controller
                     switch ($request->input('ttransaccion')) {
                         case "app":
                             if ($request->input('app')) {
-                                $idsEstacion = Estacion::where('t.IDAplicacion', $request->input('app'))->get([ 'ID' ]);
+                                $idsEstacion = Estacion::where('t.IDAplicacion', $request->input('app'))->get(['ID']);
                                 $query = $query->whereIn('t.IDEstacion', $idsEstacion);
                             } else {
                                 $query = $query->WhereNotNull('t.IDEstacion');
@@ -253,9 +231,6 @@ class TransaccionController extends Controller
                             break;
                     }
                 }
-
-
-
 
 
                 $detalles = $query->paginate($request->input('psize'));
@@ -288,6 +263,7 @@ class TransaccionController extends Controller
 
     }
 
+
     public function total(Request $request)
     {
         try {
@@ -302,19 +278,20 @@ class TransaccionController extends Controller
         }
     }
 
-    public static function balanceComprobacion( $empresa ){
-       // $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
-        $parametro = Parametroempresa::where('IDEmpresa', $empresa )->first();
+    public static function balanceComprobacion($empresa)
+    {
+        // $rows = DB::select('CALL balance_comprobacion(?)', [ $modplanc ]);
+        $parametro = Parametroempresa::where('IDEmpresa', $empresa)->first();
 
         $comprobacion = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
-        ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
-        ->join('detalletransaccion','plancontable.ID','=','detalletransaccion.IDCuenta')
-        ->join('transaccion','detalletransaccion.IDTransaccion','=','transaccion.ID')
-        ->where('modeloplancontable.ID',$parametro->Valor)
-        ->where('transaccion.Estado','ACT')
-        ->groupBy('cuentacontable.ID')
-        ->orderBy('cuentacontable.NumeroCuenta')
-        ->get([DB::raw("cuentacontable.ID,
+            ->join('modeloplancontable', 'plancontable.IDModelo', '=', 'modeloplancontable.ID')
+            ->join('detalletransaccion', 'plancontable.ID', '=', 'detalletransaccion.IDCuenta')
+            ->join('transaccion', 'detalletransaccion.IDTransaccion', '=', 'transaccion.ID')
+            ->where('modeloplancontable.ID', $parametro->Valor)
+            ->where('transaccion.Estado', 'ACT')
+            ->groupBy('cuentacontable.ID')
+            ->orderBy('cuentacontable.NumeroCuenta')
+            ->get([DB::raw("cuentacontable.ID,
 		CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) Etiqueta,		
 		sum(detalletransaccion.Debe) Debe,
 		sum(detalletransaccion.Haber) Haber,
@@ -324,4 +301,10 @@ class TransaccionController extends Controller
     }
 
   
+    public function estadoresultado(Request $request, $modplanc)
+    {
+        $rows = DB::select('CALL estadoresultado(?)', [$modplanc]);
+        return Response($rows, 200);
+    }
+
 }

@@ -8,6 +8,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model as Eloquent;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Class Cuentacontable
@@ -59,6 +61,32 @@ class Cuentacontable extends Eloquent
 		'IDTipoEstado'
 	];
 
+    public static function boot() {
+
+        parent::boot();
+
+        static::created(function($item) {
+            Event::fire('item.created', $item);
+        });
+
+
+
+        static::updated(function($item) {
+
+            Event::fire('item.updated', $item);
+
+        });
+
+
+
+        static::deleted(function($item) {
+
+            Event::fire('item.deleted', $item);
+
+        });
+
+    }
+
 	public function tipoestado()
 	{
 		return $this->belongsTo(\App\Models\Tipoestado::class, 'IDTipoEstado');
@@ -67,6 +95,7 @@ class Cuentacontable extends Eloquent
 	public function cuentacontable()
 	{
 		return $this->belongsTo(\App\Models\Cuentacontable::class, 'IDPadre');
+//        return $this->belongsToMany(\App\Models\Cuentacontable::class, 'IDPadre');
 	}
 
 	public function diariocontable()
@@ -83,6 +112,31 @@ class Cuentacontable extends Eloquent
 	{
 		return $this->hasMany(\App\Models\Cuentacontable::class, 'IDPadre');
 	}
+
+	#region Recursive
+    public function children()
+    {
+        return $this->hasMany(\App\Models\Cuentacontable::class, 'IDPadre');
+    }
+
+	public function allChildren()
+	{
+        return $this->children()->with('allChildren');
+	}
+	#endregion
+
+    #region RecursiveBelongTo
+    public function childrenBelong()
+    {
+        return $this->belongsTo(\App\Models\Cuentacontable::class, 'IDPadre');
+    }
+
+    public function allChildrenBelong()
+    {
+        return $this->childrenBelong()->with('allChildrenBelong');
+    }
+    #endregion
+
 
 	public function cuentadefectos()
 	{
@@ -103,4 +157,35 @@ class Cuentacontable extends Eloquent
 	{
 		return $this->hasMany(\App\Models\Plancontable::class, 'IDCuenta');
 	}
+
+//    protected static function boot()
+//    {
+//        static::updated(function ($product) {
+//
+//            parent::boot();
+//
+//            static::created(function($item) {
+//
+//                Event::fire('item.created', $item);
+//
+//            });
+//
+//            static::updated(function($item) {
+//
+//                Event::fire('item.updated', $item);
+//
+//            });
+//
+//
+//
+//            static::deleted(function($item) {
+//
+//                Event::fire('item.deleted', $item);
+//
+//            });
+//
+//        });
+//    }
+
+
 }
