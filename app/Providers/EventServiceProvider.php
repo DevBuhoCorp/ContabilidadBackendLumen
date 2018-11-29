@@ -15,5 +15,22 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\ExampleEvent' => [
             'App\Listeners\ExampleListener',
         ],
+        'item.created' => [
+
+            'App\Events\CuentaContableEvent@itemCreated',
+
+        ],
+
+        'item.updated' => [
+
+            'App\Events\CuentaContableEvent@itemUpdated',
+
+        ],
+
+        'item.deleted' => [
+
+            'App\Events\CuentaContableEvent@itemDeleted',
+
+        ]
     ];
 }

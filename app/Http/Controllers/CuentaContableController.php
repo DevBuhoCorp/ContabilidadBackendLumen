@@ -7,6 +7,7 @@ use App\Models\Parametroempresa;
 use App\Models\Plancontable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class CuentaContableController extends Controller
 {
@@ -221,4 +222,5 @@ class CuentaContableController extends Controller
     {
         //
     }
+
 }

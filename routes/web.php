@@ -195,6 +195,7 @@ $router->group(['middleware' => 'app'], function () use ($router) {
 
     //    Ingresar Transaccion
     $router->post('app/transaccion/{empresa}', ['uses' => 'TransaccionController@store_app']);
+    $router->get('app/cc/{cc}', ['uses' => 'CuentacontableController@update_recurs']);
 
     $router->post('app/test', function (Request $request) {
         return response()->json(1, 201);
@@ -206,8 +207,3 @@ $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
 
 $router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
 
-
-
-//$router->get('app/plancontable/{Empresa}', ['uses' => 'ApiController@apiPlanCuenta']);
-//$router->get('app/plancontable/{Empresa}/hab', ['uses' => 'ApiController@apiPlanHabCuenta']);
-//$router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);

@@ -44,7 +44,7 @@ class ApiController extends Controller
                 $cuentasBruto = Cuentacontable::
                 join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
                     ->where('plancontable.IDModelo', $modelo['ID'])
-                    ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
+                    ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre', 'cuentacontable.IDGrupoCuenta']);
                 $modelo["PlanCuenta"] = $cuentasBruto;
 
 //                $cuentasPadre = $cuentasBruto->where('IDPadre', null);
@@ -86,7 +86,7 @@ class ApiController extends Controller
             $cuentasBruto = Cuentacontable::
                 join('plancontable', 'IDCuenta', '=', 'cuentacontable.ID')
                 ->where('plancontable.IDModelo', $id)
-                ->get(['plancontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado']);
+                ->get(['plancontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'cuentacontable.IDGrupoCuenta']);
 //                            ->get(['cuentacontable.ID', 'Etiqueta', 'NumeroCuenta', 'cuentacontable.Estado', 'IDPadre']);
             return response()->json($cuentasBruto, 200);
         } catch (ModelNotFoundException $e) {
