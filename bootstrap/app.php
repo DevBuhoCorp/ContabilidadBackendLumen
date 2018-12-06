@@ -117,5 +117,8 @@ $app->router->group([
 
 $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
+
 $app->configure('auth');
+$app->configure('excel');
+
 return $app;
