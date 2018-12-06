@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\Cuentacontable;
+use App\Models\Datospersonale;
 use App\Models\Modeloplancontable;
 use App\Models\Parametro;
 use App\Models\Parametroempresa;
 use App\Models\Plancontable;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ModeloPlanContableController extends Controller
 {
@@ -183,4 +186,43 @@ class ModeloPlanContableController extends Controller
         }
 
     }
+
+    public function export(Request $request, $modelopc)
+    {
+        try {
+            $data = Cuentacontable::join('plancontable', 'IDCuenta', 'cuentacontable.ID')
+                ->where('plancontable.IDModelo', $modelopc)
+                ->get(['NumeroCuenta', 'Etiqueta', 'Saldo'])->toArray();
+
+            $data = array_map(function( $row ){
+                return [
+                    $row["NumeroCuenta"],
+                    (str_repeat('        ', substr_count($row["NumeroCuenta"], '.'))) . $row["Etiqueta"],
+                    $row["Saldo"]
+                ];
+            }, $data);
+
+
+
+            $user = Datospersonale::where('IDUser', $request->user()->id)->first();
+
+            return Excel::load('app/Files/PlanContable.xlsx', function ($reader) use ($request, $data, $user) {
+
+                $sheet = $reader->getActiveSheet();
+
+                $sheet->setCellValue('A3', 'Fecha Reporte: '. date('Y-m-d H:i:s') );
+                $sheet->setCellValue('A4', 'Usuario Reporte: '. $user->ApellidoPaterno. ' ' . $user->NombrePrimer );
+
+                $sheet->fromArray($data, null, 'A6', true);
+
+
+            })->download('xlsx', [ 'Access-Control-Allow-Origin' => '*' ]);
+
+
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
 }

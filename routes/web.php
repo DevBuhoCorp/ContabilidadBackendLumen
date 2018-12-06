@@ -88,9 +88,12 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->put('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@update']);
     $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@destroy']);
 
-    $router->get('modeloplancontable/export/{id}', function ( $id ) {
-        return ( new CuentacontableExport($id) )->download( 'CuentaContables.xlsx' );
-    });
+    $router->get('modeloplancontable/export/{modelopc}', ['uses' => 'ModeloPlanContableController@export']);
+
+//    $router->get('modeloplancontable/export/{id}', function ($id) {
+//        return (new CuentacontableExport($id))->download('CuentaContables.xlsx');
+//    });
+
 
 
 
@@ -174,6 +177,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('export_balancefinal', ['uses' => 'ExportController@exportbalancefinal']);
     $router->get('export_estadoresultado/{id}', ['uses' => 'ExportController@exportestadoresultado']);
 
+
+
 //Dashboard
     $router->get('transpormes/{empresa}', ['uses' => 'DashboardController@transpormes']);
     $router->get('topcuentas/{modelo}', ['uses' => 'DashboardController@topcuentas']);
@@ -182,6 +187,8 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
 
 //Datos Personales
     $router->get('datospersonales/{iduser}', ['uses' => 'DatosPersonalesController@show']);
+
+
 
 
 });
@@ -206,4 +213,22 @@ $router->group(['middleware' => 'app'], function () use ($router) {
 $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
 
 $router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
+
+$router->get('/excel', function () use ($router) {
+
+
+    $data = \App\Models\Cuentum::all()->toArray();
+
+    return Excel::load('app/Files/example.xlsx', function ($reader) use ($data) {
+
+        $sheet = $reader->getActiveSheet();
+
+        $sheet->fromArray($data, null, 'B6', true);
+
+
+    })->download('xlsx');
+
+});
+
+$router->get('export_diario', ['uses' => 'ExportController@exportDiarioContable']);
 

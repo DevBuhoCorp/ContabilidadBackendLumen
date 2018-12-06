@@ -63,11 +63,6 @@ class TransaccionController extends Controller
                 }
 
 
-
-
-
-
-
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
@@ -129,37 +124,43 @@ class TransaccionController extends Controller
 
     }
 
+    public function query(Request $request)
+    {
+        $query = Transaccion::where('Transaccion.Estado', $request->input('Estado'))->where('IDEmpresa', $request->input('Empresa'));
+
+        if ($request->input('FInicio')) {
+            $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
+            $FFin = ($request->input('FFin')) ? Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
+            $query->whereBetween(DB::raw('date(Fecha)'), [$FInicio, $FFin]);
+        } elseif ($request->input('FFin')) {
+            $FFin = Carbon::parse($request->input('FFin'))->toDateString();
+            $query->where(DB::raw('date(Fecha)'), '<=', $FFin);
+        }
+
+        if ($request->input('ttransaccion')) {
+            switch ($request->input('ttransaccion')) {
+                case "app":
+                    if ($request->input('app')) {
+                        $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get(['ID']);
+                        $query = $query->whereIn('IDEstacion', $idsEstacion);
+                    } else {
+                        $query = $query->WhereNotNull('IDEstacion');
+                    }
+                    break;
+                case "manual":
+                    $query = $query->whereNull('IDEstacion');
+                    break;
+            }
+        }
+        return $query;
+    }
+
     public function index(Request $request)
     {
         try {
             if ($request->isJson()) {
 
-                $query = Transaccion::where('Estado', $request->input('Estado'))->where('IDEmpresa', $request->input('Empresa'));
-
-                if ($request->input('FInicio')) {
-                    $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
-                    $FFin = ($request->input('FFin')) ? Carbon::parse($request->input('FFin'))->toDateString() : Carbon::now()->toDateString();
-                    $query->whereBetween(DB::raw('date(Fecha)'), [$FInicio, $FFin]);
-                } elseif ($request->input('FFin')) {
-                    $FFin = Carbon::parse($request->input('FFin'))->toDateString();
-                    $query->where(DB::raw('date(Fecha)'), '<=', $FFin);
-                }
-
-                if ($request->input('ttransaccion')) {
-                    switch ($request->input('ttransaccion')) {
-                        case "app":
-                            if ($request->input('app')) {
-                                $idsEstacion = Estacion::where('IDAplicacion', $request->input('app'))->get(['ID']);
-                                $query = $query->whereIn('IDEstacion', $idsEstacion);
-                            } else {
-                                $query = $query->WhereNotNull('IDEstacion');
-                            }
-                            break;
-                        case "manual":
-                            $query = $query->whereNull('IDEstacion');
-                            break;
-                    }
-                }
+                $query = $this->query($request);
                 $totales = ["Debe" => $query->sum('Debe'), "Haber" => $query->sum('Haber')];
                 $transacciones = $query->paginate($request->input('psize'));
 
@@ -300,11 +301,13 @@ class TransaccionController extends Controller
         return $comprobacion;
     }
 
-  
+
     public function estadoresultado(Request $request, $modplanc)
     {
         $rows = DB::select('CALL estadoresultado(?)', [$modplanc]);
         return Response($rows, 200);
     }
+
+
 
 }

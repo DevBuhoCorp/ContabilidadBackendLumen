@@ -24,7 +24,7 @@ $app = new Laravel\Lumen\Application(
 );
 
 $app->withFacades(true, [
-    Maatwebsite\Excel\Facades\Excel::class  => 'Excel',
+    'Maatwebsite\Excel\Facades\Excel' =>'Excel'
 ]);
 
 $app->withEloquent();
@@ -119,6 +119,6 @@ $app->register(Laravel\Passport\PassportServiceProvider::class);
 $app->register(Dusterio\LumenPassport\PassportServiceProvider::class);
 
 $app->configure('auth');
-$app->configure('excel');
+
 
 return $app;
