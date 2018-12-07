@@ -108,10 +108,7 @@ class ExportController extends Controller
                     'DetalleTransaccion.Haber',
                 ])->toArray();
 
-
-
 //                return response()->json($transacciones, 200);
-
 
                 return Excel::load('app/Files/LibroDiario.xlsx', function ($reader) use ($request, $transacciones, $totales) {
 
