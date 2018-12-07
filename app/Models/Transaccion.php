@@ -66,6 +66,15 @@ class Transaccion extends Eloquent
 		return $this->hasMany(\App\Models\Detalletransaccion::class, 'IDTransaccion');
 	}
 
+	public function detalletransaccions_v2()
+	{
+		return $this->hasMany(\App\Models\Detalletransaccion::class, 'IDTransaccion')
+            ->select('DetalleTransaccion.ID', 'DetalleTransaccion.IDTransaccion', 'CuentaContable.NumeroCuenta', 'CuentaContable.Etiqueta', 'DetalleTransaccion.Debe', 'DetalleTransaccion.Haber' )
+            ->join('PlanContable', 'PlanContable.ID', 'DetalleTransaccion.IDCuenta' )
+            ->join('CuentaContable', 'CuentaContable.ID',  'PlanContable.IDCuenta');
+//            ->get();
+	}
+
 	public function documentocontables()
 	{
 		return $this->hasMany(\App\Models\Documentocontable::class, 'IDTransaccion');

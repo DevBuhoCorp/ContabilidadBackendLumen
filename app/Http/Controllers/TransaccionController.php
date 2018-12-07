@@ -47,8 +47,23 @@ class TransaccionController extends Controller
                         $transaccion->detalletransaccions()->createMany($detalles);
 
                         foreach ($detalles as $detalle) {
-                            $cuentacontable = Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')->where('plancontable.ID', $detalle["IDCuenta"])->first();
-                            $cuentacontable->update(["Saldo" => $cuentacontable["Saldo"] + ($detalle["Debe"] - $detalle["Haber"])]);
+
+                            $valor = ($detalle["Debe"] - $detalle["Haber"]);
+                            // Actualizar el saldo de la cuenta contable en el asiento
+                            Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')
+                                ->where('plancontable.ID', $detalle["IDCuenta"])
+                                ->update( [ "Saldo" => DB::raw('Saldo ' . $valor) ] );
+
+                            // Obtener las cuentas padres de la cuenta contable en el asiento
+                            $padres = DB::select('call getPadres(?)', [ $detalle["IDCuenta"] ]);
+                            $padres = array_map(function ($row) {
+                                return $row->ID;
+                            }, $padres);
+
+                            // Actualizar el saldo de los padres la cuenta contable en el asiento
+                            Cuentacontable::whereIn('ID', $padres)
+                                ->update( [ "Saldo" => DB::raw('Saldo ' . $valor) ] );
+
                         }
                         $results["IDREF"] = $trans["IDREF"];
 
@@ -307,7 +322,6 @@ class TransaccionController extends Controller
         $rows = DB::select('CALL estadoresultado(?)', [$modplanc]);
         return Response($rows, 200);
     }
-
 
 
 }

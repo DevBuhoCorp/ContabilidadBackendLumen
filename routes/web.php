@@ -207,3 +207,36 @@ $router->get('app/empresa', ['uses' => 'ApiController@apiEmpresa']);
 
 $router->get('app/pc', ['uses' => 'ApiController@PContableNew']);
 
+$router->get('/excel', function () use ($router) {
+
+
+    $data = \App\Models\Cuentum::all()->toArray();
+
+    return Excel::load('app/Files/example.xlsx', function ($reader) use ($data) {
+
+        $sheet = $reader->getActiveSheet();
+
+        $sheet->fromArray($data, null, 'B6', true);
+
+
+    })->download('xlsx');
+
+});
+
+$router->get('export_diario', ['uses' => 'ExportController@exportDiarioContable']);
+
+$router->get('trans/test', function(){
+//    $data = \App\Models\Transaccion::with(array('detalletransaccions' => function($query){
+//        $query->select([ 'DetalleTransaccion.ID', 'DetalleTransaccion.IDTransaccion','CuentaContable.Etiqueta', 'DetalleTransaccion.Debe', 'DetalleTransaccion.Haber' ]);
+//        $query->join('PlanContable', 'PlanContable.ID', 'DetalleTransaccion.IDCuenta' )
+//              ->join('CuentaContable', 'CuentaContable.ID',  'PlanContable.IDCuenta')
+//              ->get();
+////              ->get([ 'CuentaContable.Etiqueta', 'DetalleTransaccion.Debe', 'DetalleTransaccion.Haber' ]);
+//    }))->limit(10)->get();
+
+    $data = \App\Models\Transaccion::with('detalletransaccions_v2')->get([ 'ID', 'Fecha', 'Etiqueta' ]);
+
+
+    return $data;
+});
+

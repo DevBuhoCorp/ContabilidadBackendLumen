@@ -94,33 +94,57 @@ class ExportController extends Controller
             if (true) {
 
                 $query = (new TransaccionController())->query($request);
-                $query->join('DetalleTransaccion', 'DetalleTransaccion.IDTransaccion', 'Transaccion.ID')
-                    ->join('CuentaContable', 'CuentaContable.ID', 'DetalleTransaccion.IDCuenta');
-
-                $totales = ["Debe" => $query->sum('DetalleTransaccion.Debe'), "Haber" => $query->sum('DetalleTransaccion.Haber')];
-
-                $transacciones = $query->get([
-                    DB::raw('date(Transaccion.Fecha)'),
-                    'CuentaContable.NumeroCuenta',
-                    DB::raw("IF(`DetalleTransaccion`.`Haber` > 0, CONCAT('     ',`CuentaContable`.`Etiqueta`), `CuentaContable`.`Etiqueta` ) Etiqueta"),
-//                    'CuentaContable.Etiqueta',
-                    'DetalleTransaccion.Debe',
-                    'DetalleTransaccion.Haber',
-                ])->toArray();
-
-
+                $transacciones = $query->with('detalletransaccions_v2')->get(['ID', 'Fecha', 'Etiqueta', 'Debe', 'Haber']);
+//                $query->join('DetalleTransaccion', 'DetalleTransaccion.IDTransaccion', 'Transaccion.ID')
+//                    ->join('CuentaContable', 'CuentaContable.ID', 'DetalleTransaccion.IDCuenta');
+//
+                $totales = ["Debe" => $query->sum('Transaccion.Debe'), "Haber" => $query->sum('Transaccion.Haber')];
+//
+//                $transacciones = $query->get([
+//                    DB::raw('date(Transaccion.Fecha)'),
+//                    'CuentaContable.NumeroCuenta',
+//                    DB::raw("IF(`DetalleTransaccion`.`Haber` > 0, CONCAT('     ',`CuentaContable`.`Etiqueta`), `CuentaContable`.`Etiqueta` ) Etiqueta"),
+//                    'DetalleTransaccion.Debe',
+//                    'DetalleTransaccion.Haber',
+//                ])->toArray();
 
 //                return response()->json($transacciones, 200);
-
 
                 return Excel::load('app/Files/LibroDiario.xlsx', function ($reader) use ($request, $transacciones, $totales) {
 
                     $sheet = $reader->getActiveSheet();
 
-                    $sheet->setCellValue('C9', $totales["Debe"] );
-                    $sheet->setCellValue('F9', $totales["Haber"] );
+                    $sheet->setCellValue('C9', $totales["Debe"]);
+                    $sheet->setCellValue('F9', $totales["Haber"]);
+                    $row = 12;
 
-                    $sheet->fromArray($transacciones, null, 'B12', true);
+                    foreach ($transacciones as $transacion) {
+                        $sheet->setCellValue('B' . $row, $transacion->Fecha);
+
+                        $rows = $transacion->detalletransaccions_v2->map(function ($x) {
+                            return [$x->NumeroCuenta, $x->Etiqueta, $x->Debe, $x->Haber];
+                        })->toArray();
+                        $sheet->fromArray($rows, null, 'C' . $row, true);
+                        $row += count($transacion->detalletransaccions_v2);
+
+                        $sheet->mergeCells('B' . $row . ':D' . $row);
+
+                        $sheet->getStyle( 'B' . $row . ':F' . $row )
+                            ->applyFromArray([
+                                'font' => [
+//                                'size' => 18,
+                                    'bold' => true
+                                ]
+                            ]);
+                        // getAlignment()->setHorizontal('center');
+                        $sheet->setCellValue('B' . $row, $transacion->Etiqueta);
+                        $sheet->setCellValue('E' . $row, $transacion->Debe);
+                        $sheet->setCellValue('F' . $row, $transacion->Haber);
+                        $row += 2;
+
+                    }
+
+//                    $sheet->fromArray($transacciones, null, 'B12', true);
 
 
                 })->download('xlsx', ['Access-Control-Allow-Origin' => '*']);
