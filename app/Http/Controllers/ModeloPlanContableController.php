@@ -10,6 +10,7 @@ use App\Models\Parametroempresa;
 use App\Models\Plancontable;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ModeloPlanContableController extends Controller
@@ -83,12 +84,10 @@ class ModeloPlanContableController extends Controller
     {
         try {
             if ($request->isJson()) {
-                $modelopc = Modeloplancontable::create($request->all());
-                $modelopc->Estado = $modelopc->Estado ? 'ACT' : 'INA';
-                $modelopc->save();
-                $idModelo = Parametro::where('Abr', 'PCP')->first()["Valor"];
-                $Plantilla = (new PlanContableController())->PlanCuenta($idModelo);
-                $this->PlantillaCuenta_save($Plantilla, $modelopc->ID, null);
+                $data = $request->all();
+                $data["Estado"] = $data["Estado"] ? 'ACT' : 'INA';
+                $modelopc = Modeloplancontable::create( $data );
+                DB::select('call StorePlantilla(:Modelo)', [ "Modelo" => $modelopc->ID ]);
 
                 return response()->json($modelopc, 200);
             }
@@ -97,24 +96,6 @@ class ModeloPlanContableController extends Controller
             return response()->json(['error' => $e], 500);
         }
     }
-
-    public function PlantillaCuenta_save($cuentasP, $idMPC, $idRef)
-    {
-        foreach ($cuentasP as $cP) {
-            $cP["IDPadre"] = $idRef;
-            $cuenta = new Cuentacontable();
-            $cuenta->fill($cP);
-            $cuenta->ID = 0;
-            $cuenta->save();
-            $planc = Plancontable::create(['IDCuenta' => $cuenta->ID, 'IDModelo' => $idMPC, 'ncuenta' => $cP['ncuenta']]);
-            if (array_key_exists("children", $cP)) {
-                $this->PlantillaCuenta_save($cP["children"]->toArray(), $idMPC, $cuenta->ID);
-            }
-
-        }
-        return true;
-    }
-
 
     /**
      * Display the specified resource.
