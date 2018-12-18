@@ -12,6 +12,7 @@ use App\Models\Plancontable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class TransaccionController extends Controller
 {
@@ -52,7 +53,7 @@ class TransaccionController extends Controller
                             // Actualizar el saldo de la cuenta contable en el asiento
                             Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')
                                 ->where('plancontable.ID', $detalle["IDCuenta"])
-                                ->update( [ "Saldo" => DB::raw('Saldo ' . $valor) ] );
+                                ->update( [ "Saldo" => DB::raw('Saldo + ' . $valor) ] );
 
                             // Obtener las cuentas padres de la cuenta contable en el asiento
                             $padres = DB::select('call getPadres(?)', [ $detalle["IDCuenta"] ]);
@@ -62,7 +63,7 @@ class TransaccionController extends Controller
 
                             // Actualizar el saldo de los padres la cuenta contable en el asiento
                             Cuentacontable::whereIn('ID', $padres)
-                                ->update( [ "Saldo" => DB::raw('Saldo ' . $valor) ] );
+                                ->update( [ "Saldo" => DB::raw('Saldo + ' . $valor) ] );
 
                         }
                         $results["IDREF"] = $trans["IDREF"];
@@ -73,7 +74,10 @@ class TransaccionController extends Controller
                     return response()->json($results, 201);
                 } catch (\Exception $e) {
                     DB::rollBack();
-                    $results["EstadoTransaccion"] = "ERROR";
+                    Log::info(
+                        $e->getMessage()
+                    );
+                    $results["EstadoTransaccion"] = $e->getMessage();
                     return response()->json($results, 201);
                 }
 
