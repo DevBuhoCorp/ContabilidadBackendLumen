@@ -21,6 +21,7 @@ class AplicacionController extends Controller
                 $apps = Aplicacion::
                     join('empresaaplicacion as eapp', 'eapp.IDAplicacion', '=', 'aplicacion.ID')
                     ->where('eapp.IDEmpresa', $request->input('empresa'))
+                    ->select(['Aplicacion.*'])
                     ->Paginate($request->input('psize'));
                 return response()->json($apps, 200);
             }

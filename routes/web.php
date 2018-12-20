@@ -13,8 +13,11 @@
 
 use App\Exports\CuentacontableExport;
 use App\Exports\UsersExport;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Facades\Excel;
+
+date_default_timezone_set('America/Guayaquil');
 
 
 $router->get('app/conexion', function () use ($router) {
@@ -23,6 +26,7 @@ $router->get('app/conexion', function () use ($router) {
 });
 
 $router->get('/', function () use ($router) {
+//    return Carbon::now();
     return $router->app->version();
 });
 
@@ -88,9 +92,11 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->put('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@update']);
     $router->delete('modeloplancontable/{id}', ['uses' => 'ModeloPlanContableController@destroy']);
 
-    $router->get('modeloplancontable/export/{id}', function ( $id ) {
-        return ( new CuentacontableExport($id) )->download( 'CuentaContables.xlsx' );
-    });
+    $router->get('modeloplancontable/export/{modelopc}', ['uses' => 'ModeloPlanContableController@export']);
+
+//    $router->get('modeloplancontable/export/{id}', function ( $id ) {
+//        return ( new CuentacontableExport($id) )->download( 'CuentaContables.xlsx' );
+//    });
 
 
 
@@ -150,6 +156,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('transporcuenta/{id}', ['uses' => 'TransaccionController@transporcuenta']);
     $router->get('totaltrans', ['uses' => 'TransaccionController@total']);
     $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
+    $router->post('transaccion_contabilizar/', ['uses' => 'TransaccionController@updateContabilizar']);
 
 // Balances Comprobacion
     $router->get('balance_comprobacion/{empresa}', ['uses' => 'TransaccionController@balanceComprobacion']);

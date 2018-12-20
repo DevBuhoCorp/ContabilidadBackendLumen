@@ -17,8 +17,27 @@ use Illuminate\Support\Facades\Log;
 class TransaccionController extends Controller
 {
 
+
+    private function updateSaldos($cuenta, $saldo)
+    {
+        Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')
+            ->where('plancontable.ID', $cuenta)
+            ->update(["Saldo" => DB::raw('Saldo + ' . $saldo)]);
+
+        // Obtener las cuentas padres de la cuenta contable en el asiento
+        $padres = DB::select('call getPadres(?)', [$cuenta]);
+        $padres = array_map(function ($row) {
+            return $row->ID;
+        }, $padres);
+
+        // Actualizar el saldo de los padres la cuenta contable en el asiento
+        Cuentacontable::whereIn('ID', $padres)
+            ->update(["Saldo" => DB::raw('Saldo + ' . $saldo)]);
+    }
+
     public function store_app(Request $request, $empresa)
     {
+//        Carbon::set
         try {
             if ($request->isJson()) {
                 $results = [
@@ -47,25 +66,14 @@ class TransaccionController extends Controller
 
                         $transaccion->detalletransaccions()->createMany($detalles);
 
-                        foreach ($detalles as $detalle) {
+                        if ($transaccion->Estado == 'ACT')
+                            foreach ($detalles as $detalle) {
 
-                            $valor = ($detalle["Debe"] - $detalle["Haber"]);
-                            // Actualizar el saldo de la cuenta contable en el asiento
-                            Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')
-                                ->where('plancontable.ID', $detalle["IDCuenta"])
-                                ->update( [ "Saldo" => DB::raw('Saldo + ' . $valor) ] );
+                                $valor = ($detalle["Debe"] - $detalle["Haber"]);
 
-                            // Obtener las cuentas padres de la cuenta contable en el asiento
-                            $padres = DB::select('call getPadres(?)', [ $detalle["IDCuenta"] ]);
-                            $padres = array_map(function ($row) {
-                                return $row->ID;
-                            }, $padres);
+                                $this->updateSaldos($detalle["IDCuenta"], $valor);
 
-                            // Actualizar el saldo de los padres la cuenta contable en el asiento
-                            Cuentacontable::whereIn('ID', $padres)
-                                ->update( [ "Saldo" => DB::raw('Saldo + ' . $valor) ] );
-
-                        }
+                            }
                         $results["IDREF"] = $trans["IDREF"];
 
                     }
@@ -115,22 +123,24 @@ class TransaccionController extends Controller
                 $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
                 $documento->IDTransaccion = $transaccion->ID;
                 $documento->save();
+
                 for ($i = 0; $i < count($detalles); $i++) {
                     $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
-
-                    $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
-                    $cuentacontable = Cuentacontable::find($planc->IDCuenta);
-                    $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-                    $cuentacontable->save();
-                    /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                    $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
-                    $cuentacontablepadre->save();*/
-                    $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                    do {
-                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-                        $cuentacontablepadre->save();
-                        $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
-                    } while ($cuentacontablepadre);
+                    if ($transaccion->Estado == 'ACT') {
+                        $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
+                        $cuentacontable = Cuentacontable::find($planc->IDCuenta);
+                        $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                        $cuentacontable->save();
+                        /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
+                        $cuentacontablepadre->save();*/
+                        $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                        do {
+                            $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                            $cuentacontablepadre->save();
+                            $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+                        } while ($cuentacontablepadre);
+                    }
                 }
                 $detalles = Detalletransaccion::insert($detalles);
                 return response()->json($transaccion->ID, 201);
@@ -277,6 +287,72 @@ class TransaccionController extends Controller
                 return response()->json($transaccion, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
+    public function updateContabilizar(Request $request)
+    {
+        try {
+            $Transaccion_valid = Transaccion::join('DetalleTransaccion', 'DetalleTransaccion.IDTransaccion', 'Transaccion.ID')
+                ->whereIn('Transaccion.ID', $request->all())
+                ->groupby('Transaccion.ID')
+                ->having(DB::raw('(sum(DetalleTransaccion.Debe) - sum(DetalleTransaccion.Haber))'), 0)
+                ->get(['Transaccion.ID'])->pluck('ID');
+
+            if (count($Transaccion_valid) == 0) {
+                return response()->json([
+                    "message" => "Transacciones invalidas."
+                ], 200);
+            }
+
+            DB::beginTransaction();
+            try {
+                $bandera = Transaccion::whereIn('ID', $Transaccion_valid)
+                    ->update([
+                        'Estado' => 'ACT',
+                        'IDUser' => $request->user()->id,
+                    ]);
+
+
+                if ($bandera) {
+
+                    $Transacciones = Transaccion::with('detalletransaccions')->whereIn('ID', $Transaccion_valid)->get();
+
+                    foreach ($Transacciones as $transaccions) {
+                        foreach ($transaccions->detalletransaccions as $detalle) {
+                            $valor = ($detalle["Debe"] - $detalle["Haber"]);
+                            $this->updateSaldos($detalle["IDCuenta"], $valor);
+                        }
+                    }
+
+                    DB::commit();
+
+                    return response()->json([
+                        "message" => "Contabilizadas: " . $Transacciones->count() . " , No Contabilizadas(Descuadre): " . (count($request->all()) - $Transacciones->count())
+                    ], 200);
+
+
+                } else {
+                    DB::rollBack();
+                    Log::info(
+                        "Error al contabilizar"
+                    );
+                    return response()->json([
+                        "message" => "Error al contabilizar"
+                    ], 200);
+                }
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::info(
+                    $e->getMessage()
+                );
+            }
+
+
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
         }

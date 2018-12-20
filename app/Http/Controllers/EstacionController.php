@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Estacion;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
 
 class EstacionController extends Controller
 {
@@ -40,9 +39,9 @@ class EstacionController extends Controller
     {
         $estacion = new Estacion($request->all());
         $estacion->Estado = $request->input("Estado") ? 'ACT' : 'INA';
-        $estacion->Token = Password::getRepository()->createNewToken();
+        $estacion->Token = str_random(64);
         $estacion->save();
-        return Response($estacion, 200);
+        return Response($estacion, 201);
 
     }
 

@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\Model as Eloquent;
  * @property \Carbon\Carbon $Fecha
  * @property int $IDEstacion
  * @property int $IDEmpresa
+ * @property int $IDUser
  * @property string $Etiqueta
  * @property float $Debe
  * @property float $Haber
@@ -31,7 +32,7 @@ class Transaccion extends Eloquent
 {
 	protected $table = 'transaccion';
 	protected $primaryKey = 'ID';
-	public $timestamps = false;
+//	public $timestamps = false;
 
 	protected $casts = [
 		'IDEstacion' => 'int',

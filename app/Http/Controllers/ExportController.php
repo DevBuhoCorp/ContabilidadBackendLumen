@@ -114,8 +114,21 @@ class ExportController extends Controller
 
                     $sheet = $reader->getActiveSheet();
 
+                    $Cabecera = json_decode($request->input('Cabecera'), true);
+
+                    $sheet->setCellValue('C3', $Cabecera["FInicio"]);
+                    $sheet->setCellValue('C4', $Cabecera["FFin"]);
+                    $sheet->setCellValue('C5', $Cabecera["Tcuenta"]);
+
+                    $sheet->setCellValue('F3', $Cabecera["Ttransaccion"]);
+                    $sheet->setCellValue('F4', $Cabecera["App"]);
+
+
                     $sheet->setCellValue('C9', $totales["Debe"]);
                     $sheet->setCellValue('F9', $totales["Haber"]);
+
+
+                    $sheet->setCellValue('F7', count($transacciones));
                     $row = 12;
 
                     foreach ($transacciones as $transacion) {
