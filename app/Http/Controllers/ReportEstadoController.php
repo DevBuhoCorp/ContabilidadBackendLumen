@@ -26,7 +26,7 @@ class ReportEstadoController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function estado_resultado(Request $request, $empresa)
+    public static function estado_resultado($empresa)
     {
         $parametro = Parametroempresa::where('IDEmpresa', $empresa )->first();
 
@@ -62,38 +62,44 @@ class ReportEstadoController extends Controller
         //Actualiza saldo para Participación a Trabajadores - 10% Trabajadores en General
         $participaciongeneralupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
             ->where('plancontable.IDModelo', $parametro->Valor)
-            ->where('cuentacontable.NumeroCuenta', '2.1.7.8.1')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
+            ->where('cuentacontable.NumeroCuenta', '2.1.7.8.1')->get(['plancontable.ID as IDPlanContable','cuentacontable.*'])[0];   
         $participaciongeneralupd->Saldo = $participaciongeneral * -1;
         $participaciongeneralupd->save();
+        TransaccionController::updateSaldos($participaciongeneralupd->IDPlanContable,$participaciongeneral * -1);
         
         //Actualiza saldo para Participación a Trabajadores - 5% Cargas Familiares
         $participacionfamiliarupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
             ->where('plancontable.IDModelo', $parametro->Valor)
-            ->where('cuentacontable.NumeroCuenta', '2.1.7.8.2')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
+            ->where('cuentacontable.NumeroCuenta', '2.1.7.8.2')->get(['plancontable.ID as IDPlanContable','cuentacontable.*'])[0];   
         $participacionfamiliarupd->Saldo = $participacionfamiliar * -1;
         $participacionfamiliarupd->save();
+        TransaccionController::updateSaldos($participacionfamiliarupd->IDPlanContable,$participacionfamiliar * -1);
 
         //Actualiza saldo para IMPUESTO 25% --DUDA
         $impuestoupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('plancontable.IDModelo', $parametro->Valor)
-        ->where('cuentacontable.NumeroCuenta', '2.1.7.5.3')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
+        ->where('cuentacontable.NumeroCuenta', '2.1.7.5.3')->get(['plancontable.ID as IDPlanContable','cuentacontable.*'])[0];   
         $impuestoupd->Saldo = $impuesto * -1;
         $impuestoupd->save();
+        TransaccionController::updateSaldos($impuestoupd->IDPlanContable,$impuesto * -1);
 
         //Actualiza saldo para Reserva Legal 10%
         $reservaupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('plancontable.IDModelo', $parametro->Valor)
-        ->where('cuentacontable.NumeroCuenta', '3.1.4.1')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
+        ->where('cuentacontable.NumeroCuenta', '3.1.4.1')->get(['plancontable.ID as IDPlanContable','cuentacontable.*'])[0];   
         $reservaupd->Saldo = $reserva * -1;
         $reservaupd->save();
+        TransaccionController::updateSaldos($reservaupd->IDPlanContable,$reserva * -1);
 
         //Actualiza saldo para Utlidad Neta
         $utilidadupd = CuentaContable::join('plancontable', 'plancontable.IDCuenta', '=', 'cuentacontable.ID')
         ->where('plancontable.IDModelo', $parametro->Valor)
-        ->where('cuentacontable.NumeroCuenta', '3.1.7.1')->get(['cuentacontable.ID','cuentacontable.NumeroCuenta','cuentacontable.Etiqueta','cuentacontable.IDGrupoCuenta','cuentacontable.IDPadre','cuentacontable.Estado','cuentacontable.Saldo','cuentacontable.IDDiario','cuentacontable.IDTipoEstado'])[0];   
+        ->where('cuentacontable.NumeroCuenta', '3.1.7.1')->get(['plancontable.ID as IDPlanContable','cuentacontable.*'])[0];   
         $utilidadupd->Saldo = $uneta * -1;
         $utilidadupd->save();
-        return response()->json(['resultado' => $resultado, 'resultado2' => $resultado2], 201);
+        TransaccionController::updateSaldos($utilidadupd->IDPlanContable,$uneta * -1);
+
+        return ['resultado' => $resultado, 'resultado2' => $resultado2];
     }
 
     public function balancefinal( Request $request ){
@@ -117,7 +123,7 @@ class ReportEstadoController extends Controller
             ->where('plancontable.IDModelo', $parametro->Valor )
         ->where('cuentabalance.IDBalance',2)->get(['cuentacontable.Etiqueta',DB::raw('ABS(cuentacontable.Saldo) as Saldo')]);
 
-        $activosup = Cuentacontable::join('plancontable','plancontable.IDCuenta','=','cuentacontable.ID')
+      /*   $activosup = Cuentacontable::join('plancontable','plancontable.IDCuenta','=','cuentacontable.ID')
         ->where('cuentacontable.NumeroCuenta', '=', '1')
         ->where('plancontable.IDModelo', '=', $parametro->Valor)->first(['cuentacontable.ID']);
 
@@ -141,7 +147,7 @@ class ReportEstadoController extends Controller
         $actualizar = Cuentacontable::find($patrimonioup->ID);
         $actualizar->Saldo= $patrimonio->sum('Saldo');
         $actualizar->save();
-
+ */
         return response()->json(['activos' => $activos, 'pasivos' => $pasivos, 'patrimonio' => $patrimonio,
         'sumaactivos' => $activos->sum('Saldo'), 'sumapasivo' => $pasivos->sum('Saldo'),'sumapatrimonio' => $patrimonio->sum('Saldo')], 201);
     }

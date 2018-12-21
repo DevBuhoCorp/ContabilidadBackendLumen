@@ -37,7 +37,7 @@ class TipoBalanceController extends Controller
     public function combo()
     {
         try {
-            $tipoBalances = Tipobalance::all();
+            $tipoBalances = Tipobalance::where('Estado','ACT')->get();
             return response()->json($tipoBalances, 200);
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);

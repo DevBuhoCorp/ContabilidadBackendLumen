@@ -2,13 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cuentacontable;
 use App\Models\Detalletransaccion;
 use App\Models\Documentocontable;
 use App\Models\Estacion;
 use App\Models\Parametroempresa;
 use App\Models\Transaccion;
-use App\Models\Cuentacontable;
-use App\Models\Plancontable;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -17,8 +16,7 @@ use Illuminate\Support\Facades\Log;
 class TransaccionController extends Controller
 {
 
-
-    private function updateSaldos($cuenta, $saldo)
+    public static function updateSaldos($cuenta, $saldo)
     {
         Cuentacontable::join('plancontable', 'IDCuenta', 'Cuentacontable.ID')
             ->where('plancontable.ID', $cuenta)
@@ -37,11 +35,10 @@ class TransaccionController extends Controller
 
     public function store_app(Request $request, $empresa)
     {
-//        Carbon::set
         try {
             if ($request->isJson()) {
                 $results = [
-                    "IDREF" => 0
+                    "IDREF" => 0,
                 ];
                 $transs = $request->all();
 
@@ -66,7 +63,7 @@ class TransaccionController extends Controller
 
                         $transaccion->detalletransaccions()->createMany($detalles);
 
-                        if ($transaccion->Estado == 'ACT')
+                        if ($transaccion->Estado == 'ACT') {
                             foreach ($detalles as $detalle) {
 
                                 $valor = ($detalle["Debe"] - $detalle["Haber"]);
@@ -74,6 +71,8 @@ class TransaccionController extends Controller
                                 $this->updateSaldos($detalle["IDCuenta"], $valor);
 
                             }
+                        }
+
                         $results["IDREF"] = $trans["IDREF"];
 
                     }
@@ -89,7 +88,6 @@ class TransaccionController extends Controller
                     return response()->json($results, 201);
                 }
 
-
             }
             return response()->json(['error' => 'Unauthorized'], 401);
         } catch (ModelNotFoundException $e) {
@@ -98,52 +96,71 @@ class TransaccionController extends Controller
 
     }
 
-
     public function store(Request $request, $empresa)
     {
         try {
             if ($request->isJson()) {
-                $detalles = $request->all()['Detalle'];
-                $carbon = Carbon::now('America/Guayaquil');
-                $actual = $carbon->toDateTimeString();
-                $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
-                $fechadoc = $carbon2->toDateString();
-                $transaccion = new Transaccion();
-                $transaccion->Fecha = $actual;
-                // Modificar
-                $transaccion->IDEmpresa = $empresa;
-                $transaccion->IDUser = $request->user()->ID;
-                $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
-                $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
-                $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
-                $transaccion->Haber = $request->all()['Cabecera'][0]['Haber'];
-                $transaccion->save();
-                $documento = new Documentocontable();
-                $documento->Fecha = $fechadoc;
-                $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
-                $documento->IDTransaccion = $transaccion->ID;
-                $documento->save();
+                DB::beginTransaction();
+                try {
+                    $detalles = $request->all()['Detalle'];
+                    $carbon = Carbon::now('America/Guayaquil');
+                    $actual = $carbon->toDateTimeString();
+                    $carbon2 = new Carbon($request->all()['Cabecera'][0]['Fecha']);
+                    $fechadoc = $carbon2->toDateString();
+                    $transaccion = new Transaccion();
+                    $transaccion->IDEmpresa = $empresa;
+                    $transaccion->Fecha = $actual;        
+                    $transaccion->IDUser = $request->user()->ID;
+                    $transaccion->Estado = $request->all()['Cabecera'][0]['Estado'] ? 'ACT' : 'INA';
+                    //$transaccion->fill($request->all()['Cabecera'][0]);
+                    $transaccion->Etiqueta = $request->all()['Cabecera'][0]['Etiqueta'];
+                    $transaccion->Debe = $request->all()['Cabecera'][0]['Debe'];
+                    $transaccion->Haber = $request->all()['Cabecera'][0]['Haber']; 
+                    $transaccion->save();
+                    $documento = new Documentocontable();
+                    $documento->Fecha = $fechadoc;
+                    $documento->SerieDocumento = $request->all()['Cabecera'][0]['SerieDocumento'];
+                    $documento->IDTransaccion = $transaccion->ID;
+                    $documento->save();
 
-                for ($i = 0; $i < count($detalles); $i++) {
-                    $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+                    $transaccion->detalletransaccions()->createMany($detalles);
                     if ($transaccion->Estado == 'ACT') {
-                        $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
-                        $cuentacontable = Cuentacontable::find($planc->IDCuenta);
-                        $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-                        $cuentacontable->save();
-                        /*$cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                        $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + $cuentacontable->Saldo ;
-                        $cuentacontablepadre->save();*/
-                        $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
-                        do {
-                            $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
-                            $cuentacontablepadre->save();
-                            $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
-                        } while ($cuentacontablepadre);
+                        foreach ($detalles as $detalle) {
+
+                            $valor = ($detalle["Debe"] - $detalle["Haber"]);
+                            $this->updateSaldos($detalle["IDCuenta"], $valor);
+
+                        }
                     }
+                    DB::commit();
+                    return response()->json("Transacción Finalizada", 201);
+
+                    /*for ($i = 0; $i < count($detalles); $i++) {
+                $detalles[$i]["IDTransaccion"] = $documento->IDTransaccion;
+                if ($transaccion->Estado == 'ACT') {
+
+                $planc = Plancontable::find($detalles[$i]["IDCuenta"]);
+                $cuentacontable = Cuentacontable::find($planc->IDCuenta);
+                $cuentacontable->Saldo = $cuentacontable->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                $cuentacontable->save();
+
+                $cuentacontablepadre = Cuentacontable::find($cuentacontable->IDPadre);
+                do {
+                $cuentacontablepadre->Saldo = $cuentacontablepadre->Saldo + ($detalles[$i]["Debe"] - $detalles[$i]["Haber"]);
+                $cuentacontablepadre->save();
+                $cuentacontablepadre = CuentaContable::find($cuentacontablepadre->IDPadre);
+                } while ($cuentacontablepadre);
+                }
                 }
                 $detalles = Detalletransaccion::insert($detalles);
-                return response()->json($transaccion->ID, 201);
+                return response()->json($transaccion->ID, 201);*/
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::info(
+                        $e->getMessage()
+                    );
+                    return response()->json($e->getMessage(), 201);
+                }
 
             }
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -207,14 +224,14 @@ class TransaccionController extends Controller
         try {
             if ($request->isJson()) {
                 /* $detalles = Detalletransaccion::
-                     where('IDTransaccion', $id)
-                     ->paginate($request->input('psize'));*/
+                where('IDTransaccion', $id)
+                ->paginate($request->input('psize'));*/
 
                 $detalles = Detalletransaccion::join('plancontable as pc', 'detalletransaccion.IDCuenta', '=', 'pc.ID')
                     ->join('cuentacontable as cc', 'pc.IDCuenta', '=', 'cc.ID')
                     ->where('detalletransaccion.IDTransaccion', $id)
                     ->select(DB::raw("CONCAT(cc.NumeroCuenta, ' ',cc.Etiqueta) as Cuenta,detalletransaccion.Etiqueta,detalletransaccion.Debe,detalletransaccion.Haber"))
-                    ->paginate($request->input('psize'));
+                    ->get();
                 return response()->json($detalles, 200);
             }
             return response()->json(['error' => 'Unauthorized'], 401);
@@ -235,7 +252,6 @@ class TransaccionController extends Controller
                     ->join('transaccion as t', 'detalletransaccion.IDTransaccion', '=', 't.ID')
                     ->where('pc.IDCuenta', $id)
                     ->select(DB::raw("detalletransaccion.Debe,detalletransaccion.Haber,t.Etiqueta as Transaccion, t.Fecha"));
-
 
                 if ($request->input('FInicio')) {
                     $FInicio = Carbon::parse($request->input('FInicio'))->toDateString();
@@ -261,7 +277,6 @@ class TransaccionController extends Controller
                             break;
                     }
                 }
-
 
                 $detalles = $query->paginate($request->input('psize'));
 
@@ -293,6 +308,39 @@ class TransaccionController extends Controller
 
     }
 
+    public function updateajuste(Request $request, $id)
+    {
+        try {
+            if ($request->isJson()) {
+                DB::beginTransaction();
+                try {
+
+                    $transaccion = Transaccion::find($id);
+                    $transaccion->detalletransaccions()->createMany($request->all());
+
+                    $transaccion->Debe = $transaccion->detalletransaccions->sum('Debe');
+                    $transaccion->Haber = $transaccion->detalletransaccions->sum('Haber');
+                    $transaccion->save();
+
+                    DB::commit();
+                    return response()->json("Transacción Finalizada", 201);
+                } catch (\Exception $e) {
+                    DB::rollBack();
+                    Log::info(
+                        $e->getMessage()
+                    );
+                    return response()->json($e->getMessage(), 201);
+                }
+
+                //return response()->json(true, 200);
+            }
+            return response()->json(['error' => 'Unauthorized'], 401);
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => $e], 500);
+        }
+
+    }
+
     public function updateContabilizar(Request $request)
     {
         try {
@@ -304,7 +352,7 @@ class TransaccionController extends Controller
 
             if (count($Transaccion_valid) == 0) {
                 return response()->json([
-                    "message" => "Transacciones invalidas."
+                    "message" => "Transacciones invalidas.",
                 ], 200);
             }
 
@@ -315,7 +363,6 @@ class TransaccionController extends Controller
                         'Estado' => 'ACT',
                         'IDUser' => $request->user()->id,
                     ]);
-
 
                 if ($bandera) {
 
@@ -331,9 +378,8 @@ class TransaccionController extends Controller
                     DB::commit();
 
                     return response()->json([
-                        "message" => "Contabilizadas: " . $Transacciones->count() . " , No Contabilizadas(Descuadre): " . (count($request->all()) - $Transacciones->count())
+                        "message" => "Contabilizadas: " . $Transacciones->count() . " , No Contabilizadas(Descuadre): " . (count($request->all()) - $Transacciones->count()),
                     ], 200);
-
 
                 } else {
                     DB::rollBack();
@@ -341,7 +387,7 @@ class TransaccionController extends Controller
                         "Error al contabilizar"
                     );
                     return response()->json([
-                        "message" => "Error al contabilizar"
+                        "message" => "Error al contabilizar",
                     ], 200);
                 }
 
@@ -352,13 +398,11 @@ class TransaccionController extends Controller
                 );
             }
 
-
         } catch (ModelNotFoundException $e) {
             return response()->json(['error' => $e], 500);
         }
 
     }
-
 
     public function total(Request $request)
     {
@@ -388,7 +432,7 @@ class TransaccionController extends Controller
             ->groupBy('cuentacontable.ID')
             ->orderBy('cuentacontable.NumeroCuenta')
             ->get([DB::raw("cuentacontable.ID,
-		CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) Etiqueta,		
+		CONCAT(cuentacontable.NumeroCuenta,' ',cuentacontable.Etiqueta) Etiqueta,
 		sum(detalletransaccion.Debe) Debe,
 		sum(detalletransaccion.Haber) Haber,
 		IF(cuentacontable.Saldo > 0, cuentacontable.Saldo, 0) Deudor,
@@ -396,12 +440,10 @@ class TransaccionController extends Controller
         return $comprobacion;
     }
 
-
     public function estadoresultado(Request $request, $modplanc)
     {
         $rows = DB::select('CALL estadoresultado(?)', [$modplanc]);
         return Response($rows, 200);
     }
-
 
 }

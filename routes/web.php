@@ -156,6 +156,7 @@ $router->group(['middleware' => 'auth'], function () use ($router) {
     $router->get('transporcuenta/{id}', ['uses' => 'TransaccionController@transporcuenta']);
     $router->get('totaltrans', ['uses' => 'TransaccionController@total']);
     $router->put('transaccion/{id}', ['uses' => 'TransaccionController@update']);
+    $router->put('transaccion_ajuste/{id}', ['uses' => 'TransaccionController@updateajuste']);
     $router->post('transaccion_contabilizar/', ['uses' => 'TransaccionController@updateContabilizar']);
 
 // Balances Comprobacion
@@ -231,6 +232,9 @@ $router->get('/excel', function () use ($router) {
 });
 
 $router->get('export_diario', ['uses' => 'ExportController@exportDiarioContable']);
+$router->get('export_balance_comprobacion/{empresa}', ['uses' => 'ExportController@exportBalanceComprobacion']);
+$router->get('export_balance_final/{empresa}', ['uses' => 'ExportController@exportBalanceFinal']);
+$router->get('export_estado_resultado/{empresa}', ['uses' => 'ExportController@exportEstadoResultado']);
 
 $router->get('trans/test', function(){
 //    $data = \App\Models\Transaccion::with(array('detalletransaccions' => function($query){
